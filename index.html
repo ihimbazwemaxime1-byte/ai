@@ -1033,3 +1033,343 @@
 
         function showAlert(message, type = 'error') {
             const alert = document.getElementById('alertMessage');
+            alert.textContent = message;
+            alert.className = `alert alert-${type} show`;
+        }
+
+        function clearAlert() {
+            const alert = document.getElementById('alertMessage');
+            alert.classList.remove('show');
+            alert.textContent = '';
+        }
+
+        function setLoading(buttonId, isLoading) {
+            const btn = document.getElementById(buttonId);
+            if (isLoading) {
+                btn.classList.add('loading');
+                btn.disabled = true;
+            } else {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        }
+
+        function showFieldError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const wrapper = field.closest('.input-wrapper');
+            const error = document.getElementById(fieldId + 'Error');
+            if (error) {
+                error.textContent = message;
+                error.classList.add('show');
+                if (wrapper) wrapper.classList.add('error');
+                field.classList.add('error');
+            }
+        }
+
+        function clearFieldError(fieldId) {
+            const field = document.getElementById(fieldId);
+            const wrapper = field.closest('.input-wrapper');
+            const error = document.getElementById(fieldId + 'Error');
+            if (error) {
+                error.textContent = '';
+                error.classList.remove('show');
+                if (wrapper) wrapper.classList.remove('error', 'success');
+                field.classList.remove('error', 'success');
+            }
+        }
+
+        // =============================================
+        // PASSWORD STRENGTH
+        // =============================================
+
+        function checkPasswordStrength(password) {
+            const fill = document.getElementById('strengthFill');
+            const text = document.getElementById('strengthText');
+
+            let score = 0;
+
+            if (password.length >= 8) score++;
+            if (password.match(/[a-z]/)) score++;
+            if (password.match(/[A-Z]/)) score++;
+            if (password.match(/[0-9]/)) score++;
+            if (password.match(/[@$!%*?&]/)) score++;
+
+            let strength = 'Very Weak';
+            let color = '#ef4444';
+            let width = 0;
+
+            if (password.length === 0) {
+                strength = 'Enter a strong password';
+                color = 'var(--text-muted)';
+                width = 0;
+            } else if (score <= 1) {
+                strength = 'Very Weak';
+                color = '#ef4444';
+                width = 20;
+            } else if (score <= 2) {
+                strength = 'Weak';
+                color = '#f59e0b';
+                width = 40;
+            } else if (score <= 3) {
+                strength = 'Medium';
+                color = '#f59e0b';
+                width = 60;
+            } else if (score <= 4) {
+                strength = 'Strong';
+                color = '#10b981';
+                width = 80;
+            } else {
+                strength = 'Very Strong';
+                color = '#34d399';
+                width = 100;
+            }
+
+            fill.style.width = width + '%';
+            fill.style.background = color;
+            text.textContent = 'Password strength: ' + strength;
+            text.style.color = color;
+        }
+
+        // =============================================
+        // API CALLS
+        // =============================================
+
+        async function apiCall(endpoint, method, data) {
+            const url = API_URL + endpoint;
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            };
+
+            try {
+                const response = await fetch(url, options);
+                const result = await response.json();
+                return { success: response.ok, data: result };
+            } catch (error) {
+                console.error('API Error:', error);
+                return { success: false, data: { message: 'Network error. Please check your connection.' } };
+            }
+        }
+
+        // =============================================
+        // AUTH FUNCTIONS
+        // =============================================
+
+        // Login
+        async function handleLogin(e) {
+            e.preventDefault();
+            clearAlert();
+
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+
+            // Validation
+            let hasError = false;
+            if (!username) {
+                showFieldError('loginUsername', 'Please enter your username or email');
+                hasError = true;
+            }
+            if (!password) {
+                showFieldError('loginPassword', 'Please enter your password');
+                hasError = true;
+            }
+            if (hasError) return;
+
+            setLoading('loginBtn', true);
+
+            try {
+                const result = await apiCall('/auth/login', 'POST', {
+                    username_or_email: username,
+                    password: password
+                });
+
+                if (result.success) {
+                    const { accessToken, refreshToken, user } = result.data.data;
+
+                    localStorage.setItem('accessToken', accessToken);
+                    localStorage.setItem('refreshToken', refreshToken);
+                    localStorage.setItem('user', JSON.stringify(user));
+
+                    if (rememberMe) {
+                        localStorage.setItem('rememberMe', 'true');
+                    } else {
+                        localStorage.removeItem('rememberMe');
+                    }
+
+                    showAlert('Welcome back! Redirecting...', 'success');
+
+                    setTimeout(() => {
+                        window.location.href = '/dashboard.html';
+                    }, 1200);
+                } else {
+                    showAlert(result.data.message || 'Invalid credentials. Please try again.', 'error');
+                }
+            } catch (error) {
+                showAlert('An error occurred. Please try again.', 'error');
+                console.error('Login error:', error);
+            } finally {
+                setLoading('loginBtn', false);
+            }
+        }
+
+        // Register
+        async function handleRegister(e) {
+            e.preventDefault();
+            clearAlert();
+
+            const fullName = document.getElementById('regFullName').value.trim();
+            const username = document.getElementById('regUsername').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
+            const role = document.getElementById('regRole').value;
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            const termsChecked = document.getElementById('termsCheck').checked;
+
+            // Validation
+            let hasError = false;
+
+            if (!fullName || fullName.length < 2) {
+                showFieldError('regFullName', 'Full name is required (minimum 2 characters)');
+                hasError = true;
+            }
+
+            if (!username || username.length < 3) {
+                showFieldError('regUsername', 'Username must be at least 3 characters');
+                hasError = true;
+            }
+
+            if (!email || !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                showFieldError('regEmail', 'Please enter a valid email address');
+                hasError = true;
+            }
+
+            if (!password || password.length < 8) {
+                showFieldError('regPassword', 'Password must be at least 8 characters');
+                hasError = true;
+            }
+
+            if (password !== confirmPassword) {
+                showFieldError('regConfirmPassword', 'Passwords do not match');
+                hasError = true;
+            }
+
+            if (!termsChecked) {
+                showAlert('Please agree to the Terms of Service and Privacy Policy.', 'error');
+                hasError = true;
+            }
+
+            if (hasError) return;
+
+            // Build registration data
+            const data = {
+                full_name: fullName,
+                username: username,
+                email: email,
+                phone_number: phone,
+                role: role,
+                password: password
+            };
+
+            // Add patient-specific fields
+            if (role === 'patient') {
+                data.patient_id = document.getElementById('regPatientId').value.trim() || 'PAT-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+                data.blood_type = document.getElementById('regBloodType').value;
+                data.date_of_birth = document.getElementById('regDob').value;
+                data.allergies = document.getElementById('regAllergies').value.trim();
+                data.chronic_conditions = document.getElementById('regChronicConditions').value.trim();
+            }
+
+            setLoading('registerBtn', true);
+
+            try {
+                const result = await apiCall('/auth/register', 'POST', data);
+
+                if (result.success) {
+                    showAlert('Account created successfully! Redirecting to sign in...', 'success');
+
+                    setTimeout(() => {
+                        switchMode('login');
+                        document.getElementById('loginUsername').value = username;
+                        document.getElementById('loginPassword').value = '';
+                        showAlert('Account created! Please sign in.', 'info');
+                    }, 1500);
+                } else {
+                    showAlert(result.data.message || 'Registration failed. Please try again.', 'error');
+                }
+            } catch (error) {
+                showAlert('An error occurred. Please try again.', 'error');
+                console.error('Registration error:', error);
+            } finally {
+                setLoading('registerBtn', false);
+            }
+        }
+
+        // Forgot Password
+        function showForgotPassword() {
+            const email = prompt('Enter your email address to reset your password:');
+            if (email && email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                showAlert(`📧 Reset link sent to ${email}. Please check your inbox.`, 'success');
+            } else if (email) {
+                showAlert('Please enter a valid email address.', 'error');
+            }
+        }
+
+        // Check authentication status
+        async function checkAuth() {
+            const token = localStorage.getItem('accessToken');
+            if (!token) return false;
+
+            try {
+                const result = await apiCall('/auth/profile', 'GET', {});
+                if (result.success) {
+                    return result.data.data;
+                }
+                return false;
+            } catch {
+                return false;
+            }
+        }
+
+        // =============================================
+        // AUTO-LOGIN CHECK
+        // =============================================
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            const user = await checkAuth();
+            if (user) {
+                // User already logged in
+                window.location.href = '/dashboard.html';
+            }
+
+            // Check for remember me
+            if (localStorage.getItem('rememberMe') === 'true') {
+                const savedUser = localStorage.getItem('user');
+                if (savedUser) {
+                    try {
+                        const user = JSON.parse(savedUser);
+                        document.getElementById('loginUsername').value = user.username || '';
+                    } catch {}
+                }
+            }
+        });
+
+        // =============================================
+        // KEYBOARD SHORTCUTS
+        // =============================================
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                clearAlert();
+            }
+        });
+
+        console.log('⚡ Nexus AI Authentication System');
+        console.log('📱 Premium Interface Loaded');
+    </script>
+</body>
+</html>
