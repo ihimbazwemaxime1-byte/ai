@@ -1,1235 +1,1035 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nexus · AI Healthcare</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #f6f9fc;
-      color: #0b1a2b;
-      height: 100vh;
-      overflow: hidden;
-      display: flex;
-    }
-
-    /* ----- AUTH GATEWAY (glassmorphism) ----- */
-    #auth-gateway {
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(circle at 20% 30%, #13294b, #0a1628);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      transition: opacity 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-      backdrop-filter: blur(2px);
-    }
-
-    .auth-container {
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(24px) saturate(180%);
-      -webkit-backdrop-filter: blur(24px) saturate(180%);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 48px;
-      padding: 48px 40px;
-      width: 100%;
-      max-width: 440px;
-      box-shadow: 0 40px 80px -16px rgba(0, 0, 0, 0.6);
-    }
-
-    .auth-header {
-      margin-bottom: 32px;
-      text-align: center;
-    }
-
-    .auth-header h1 {
-      font-weight: 600;
-      font-size: 2.2rem;
-      letter-spacing: -0.02em;
-      color: white;
-    }
-
-    .auth-header h1 span {
-      background: linear-gradient(135deg, #8bb8ff, #3b82f6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .auth-header p {
-      color: rgba(255, 255, 255, 0.6);
-      font-weight: 400;
-      font-size: 0.95rem;
-      margin-top: 6px;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.8rem;
-      font-weight: 500;
-      letter-spacing: 0.02em;
-      color: rgba(255, 255, 255, 0.7);
-      margin-bottom: 6px;
-    }
-
-    .input-element {
-      width: 100%;
-      padding: 14px 18px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 24px;
-      font-size: 0.95rem;
-      color: white;
-      outline: none;
-      transition: all 0.2s;
-      font-weight: 400;
-    }
-
-    .input-element:focus {
-      background: rgba(255, 255, 255, 0.12);
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
-    }
-
-    .input-element option {
-      background: #13294b;
-      color: white;
-    }
-
-    .btn-submit {
-      width: 100%;
-      padding: 16px;
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
-      border: none;
-      border-radius: 40px;
-      font-weight: 600;
-      font-size: 1rem;
-      color: white;
-      cursor: pointer;
-      transition: all 0.25s;
-      margin-top: 6px;
-      letter-spacing: 0.3px;
-      box-shadow: 0 8px 24px -6px rgba(37, 99, 235, 0.4);
-    }
-
-    .btn-submit:hover {
-      transform: scale(1.02);
-      box-shadow: 0 12px 32px -8px #2563eb;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    /* ----- MAIN LAYOUT (frosted + minimal) ----- */
-    #app-ecosystem {
-      display: none;
-      width: 100%;
-      height: 100%;
-      background: #f2f6fb;
-    }
-
-    /* SIDEBAR — glassmorphism */
-    .sidebar {
-      width: 280px;
-      background: rgba(15, 23, 42, 0.7);
-      backdrop-filter: blur(28px) saturate(200%);
-      -webkit-backdrop-filter: blur(28px) saturate(200%);
-      border-right: 1px solid rgba(255, 255, 255, 0.06);
-      display: flex;
-      flex-direction: column;
-      color: #e8edf5;
-      flex-shrink: 0;
-      transition: all 0.2s;
-    }
-
-    .sidebar-brand {
-      padding: 28px 24px 20px 24px;
-      font-size: 1.5rem;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .sidebar-brand span {
-      background: linear-gradient(135deg, #93bbfc, #3b82f6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .sidebar-nav {
-      padding: 20px 12px;
-      flex: 1;
-      overflow-y: auto;
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .nav-label {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: rgba(255, 255, 255, 0.25);
-      padding: 16px 12px 6px 12px;
-      font-weight: 600;
-    }
-
-    .nav-link {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 12px 16px;
-      border-radius: 16px;
-      color: rgba(255, 255, 255, 0.6);
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: all 0.15s;
-      background: transparent;
-      border: none;
-      width: 100%;
-      text-align: left;
-    }
-
-    .nav-link:hover {
-      background: rgba(255, 255, 255, 0.06);
-      color: white;
-    }
-
-    .nav-link.active {
-      background: rgba(59, 130, 246, 0.18);
-      color: white;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-    }
-
-    /* TOP NAVBAR — clean */
-    .top-navbar {
-      background: rgba(255, 255, 255, 0.5);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      padding: 16px 36px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.02);
-    }
-
-    .search-container input {
-      width: 360px;
-      padding: 10px 22px;
-      border-radius: 40px;
-      border: 1px solid rgba(0, 0, 0, 0.04);
-      background: rgba(255, 255, 255, 0.4);
-      backdrop-filter: blur(4px);
-      font-size: 0.9rem;
-      outline: none;
-      transition: 0.2s;
-      font-weight: 400;
-    }
-
-    .search-container input:focus {
-      background: white;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
-    }
-
-    .user-menu {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .role-pill {
-      background: rgba(59, 130, 246, 0.12);
-      color: #1e4a8b;
-      padding: 6px 18px;
-      border-radius: 40px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      backdrop-filter: blur(4px);
-      border: 1px solid rgba(59, 130, 246, 0.08);
-    }
-
-    .btn-outline {
-      background: transparent;
-      border: 1px solid #cdd9e6;
-      color: #1e3a5f;
-      padding: 6px 16px;
-      border-radius: 40px;
-      font-weight: 500;
-      font-size: 0.8rem;
-      transition: 0.2s;
-      cursor: pointer;
-    }
-
-    .btn-outline:hover {
-      background: rgba(239, 68, 68, 0.04);
-      border-color: #ef4444;
-      color: #b91c1c;
-    }
-
-    /* MAIN CANVAS */
-    .dashboard-canvas {
-      padding: 32px 40px;
-      overflow-y: auto;
-      flex: 1;
-      background: transparent;
-    }
-
-    .page-view {
-      display: none;
-      animation: fadeSlide 0.3s ease;
-    }
-
-    .page-view.active {
-      display: block;
-    }
-
-    @keyframes fadeSlide {
-      0% { opacity: 0; transform: translateY(6px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-
-    .page-title {
-      font-size: 1.8rem;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      margin-bottom: 28px;
-      color: #0b1a2b;
-    }
-
-    /* ----- CARDS (soft neumorphism / morphism) ----- */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 24px;
-      margin-bottom: 36px;
-    }
-
-    .kpi-card {
-      background: rgba(255, 255, 255, 0.55);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      border-radius: 28px;
-      padding: 24px 24px;
-      box-shadow: 0 8px 32px -12px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.02);
-      transition: 0.2s;
-    }
-
-    .kpi-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 16px 40px -16px rgba(0, 20, 40, 0.08);
-    }
-
-    .kpi-title {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: #4a5f7a;
-      font-weight: 600;
-    }
-
-    .kpi-value {
-      font-size: 2.2rem;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      margin-top: 6px;
-      color: #0b1a2b;
-    }
-
-    .module-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-      gap: 28px;
-    }
-
-    .module-card {
-      background: rgba(255, 255, 255, 0.5);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.7);
-      border-radius: 32px;
-      padding: 28px;
-      box-shadow: 0 8px 32px -16px rgba(0, 0, 0, 0.02);
-      transition: all 0.2s;
-    }
-
-    .module-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: 600;
-      font-size: 1.05rem;
-      padding-bottom: 14px;
-      margin-bottom: 20px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-    }
-
-    .badge {
-      padding: 4px 14px;
-      border-radius: 40px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      background: rgba(59, 130, 246, 0.06);
-      color: #1e4a8b;
-    }
-
-    .badge-success { background: rgba(16, 185, 129, 0.08); color: #0b6e4f; }
-    .badge-warning { background: rgba(245, 158, 11, 0.08); color: #92400e; }
-    .badge-danger { background: rgba(239, 68, 68, 0.08); color: #991b1b; }
-
-    .btn-action {
-      padding: 12px 24px;
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
-      color: white;
-      border: none;
-      border-radius: 40px;
-      font-weight: 500;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: 0.2s;
-      box-shadow: 0 4px 12px -6px rgba(37, 99, 235, 0.2);
-    }
-
-    .btn-action:hover {
-      transform: scale(1.02);
-      box-shadow: 0 8px 20px -8px #2563eb;
-    }
-
-    .btn-outline {
-      background: transparent;
-      border: 1px solid #b0c8dd;
-      color: #1e3a5f;
-      box-shadow: none;
-    }
-
-    .btn-outline:hover {
-      background: rgba(0, 0, 0, 0.01);
-      border-color: #3b82f6;
-      color: #1e4a8b;
-      box-shadow: none;
-    }
-
-    /* DOCTOR WORKSPACE — 3 col */
-    .doc-workspace {
-      display: grid;
-      grid-template-columns: 280px 1fr 320px;
-      gap: 24px;
-      height: calc(100vh - 180px);
-    }
-
-    .doc-panel {
-      background: rgba(255, 255, 255, 0.45);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: 28px;
-      border: 1px solid rgba(255, 255, 255, 0.6);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .panel-header {
-      padding: 18px 22px;
-      background: rgba(255, 255, 255, 0.2);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.02);
-      font-weight: 600;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .panel-body {
-      padding: 18px 18px;
-      overflow-y: auto;
-      flex: 1;
-    }
-
-    .queue-item {
-      padding: 14px 18px;
-      border-radius: 20px;
-      margin-bottom: 10px;
-      background: rgba(255, 255, 255, 0.2);
-      border: 1px solid transparent;
-      transition: 0.15s;
-      cursor: pointer;
-    }
-
-    .queue-item.active {
-      background: rgba(59, 130, 246, 0.06);
-      border-color: #3b82f6;
-    }
-
-    .queue-item:hover {
-      background: rgba(255, 255, 255, 0.3);
-    }
-
-    .patient-avatar {
-      width: 52px;
-      height: 52px;
-      background: linear-gradient(135deg, #2563eb, #3b82f6);
-      border-radius: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 700;
-      font-size: 1.2rem;
-    }
-
-    .dictation-box textarea {
-      width: 100%;
-      height: 110px;
-      padding: 16px;
-      border-radius: 24px;
-      border: 1px solid rgba(0, 0, 0, 0.04);
-      background: rgba(255, 255, 255, 0.3);
-      backdrop-filter: blur(4px);
-      outline: none;
-      resize: none;
-      font-size: 0.95rem;
-      line-height: 1.5;
-      font-family: 'Inter', sans-serif;
-    }
-
-    .dictate-btn {
-      position: absolute;
-      bottom: 12px;
-      right: 16px;
-      background: #ef4444;
-      color: white;
-      border: none;
-      border-radius: 40px;
-      width: 44px;
-      height: 44px;
-      font-size: 1.2rem;
-      cursor: pointer;
-      box-shadow: 0 8px 20px -8px #ef4444;
-      transition: 0.2s;
-    }
-
-    .dictate-btn.recording { animation: pulse 1.2s infinite; }
-
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.06); }
-      100% { transform: scale(1); }
-    }
-
-    .action-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 10px;
-    }
-
-    .action-btn {
-      background: rgba(255, 255, 255, 0.3);
-      border: 1px solid rgba(0, 0, 0, 0.02);
-      border-radius: 40px;
-      padding: 12px;
-      font-weight: 500;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: 0.15s;
-    }
-
-    .action-btn:hover {
-      background: rgba(255, 255, 255, 0.5);
-      border-color: #3b82f6;
-    }
-
-    .alert-card {
-      padding: 16px;
-      border-radius: 20px;
-      margin-bottom: 16px;
-      border-left: 4px solid;
-    }
-
-    .alert-card.high {
-      background: rgba(239, 68, 68, 0.03);
-      border-left-color: #ef4444;
-    }
-
-    .ai-suggestion {
-      background: rgba(59, 130, 246, 0.02);
-      padding: 18px;
-      border-radius: 24px;
-      border: 1px solid rgba(59, 130, 246, 0.08);
-    }
-
-    /* MESSENGER */
-    .messenger-layout {
-      display: flex;
-      height: 60vh;
-      border-radius: 32px;
-      overflow: hidden;
-      background: rgba(255, 255, 255, 0.3);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.5);
-    }
-
-    .messenger-sidebar {
-      width: 300px;
-      background: rgba(255, 255, 255, 0.15);
-      border-right: 1px solid rgba(0, 0, 0, 0.02);
-    }
-
-    .contact-item {
-      padding: 16px 22px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.02);
-      cursor: pointer;
-    }
-
-    .contact-item.active {
-      background: rgba(59, 130, 246, 0.04);
-    }
-
-    .chat-history {
-      padding: 24px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .chat-bubble {
-      max-width: 70%;
-      padding: 14px 20px;
-      border-radius: 30px;
-      font-size: 0.95rem;
-    }
-
-    .chat-bubble.received {
-      background: white;
-      align-self: flex-start;
-      border-bottom-left-radius: 6px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-    }
-
-    .chat-bubble.sent {
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
-      color: white;
-      align-self: flex-end;
-      border-bottom-right-radius: 6px;
-    }
-
-    .chat-input-area {
-      padding: 16px 20px;
-      background: rgba(255, 255, 255, 0.1);
-      border-top: 1px solid rgba(0, 0, 0, 0.02);
-      display: flex;
-      gap: 14px;
-    }
-
-    .chat-input-area input {
-      flex: 1;
-      padding: 12px 20px;
-      border-radius: 40px;
-      border: 1px solid rgba(0, 0, 0, 0.02);
-      outline: none;
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    /* TELEMEDICINE */
-    .tele-container {
-      background: #0b1a2b;
-      height: 400px;
-      border-radius: 32px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      margin-bottom: 20px;
-      overflow: hidden;
-    }
-
-    .tele-pip {
-      width: 140px;
-      height: 100px;
-      background: #1a2e44;
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      border-radius: 20px;
-      border: 2px solid white;
-      object-fit: cover;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
-    }
-
-    /* ROBOTICS */
-    .sim-container {
-      background: rgba(15, 23, 42, 0.03);
-      padding: 24px;
-      border-radius: 28px;
-      position: relative;
-      height: 250px;
-      border: 1px solid rgba(0, 0, 0, 0.02);
-      backdrop-filter: blur(4px);
-    }
-
-    .sim-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 10px;
-      height: 100%;
-    }
-
-    .sim-zone {
-      border: 1px dashed rgba(0, 0, 0, 0.04);
-      border-radius: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #4a5f7a;
-      font-size: 0.75rem;
-      font-weight: 500;
-      text-align: center;
-    }
-
-    .bot-dot {
-      position: absolute;
-      width: 32px;
-      height: 32px;
-      background: linear-gradient(135deg, #3b82f6, #2563eb);
-      border-radius: 40px;
-      top: 40px;
-      left: 40px;
-      box-shadow: 0 0 20px #3b82f6;
-      transition: transform 3.5s cubic-bezier(0.22, 1, 0.36, 1), background 0.5s;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 0.7rem;
-      color: white;
-      font-weight: 600;
-      z-index: 10;
-    }
-
-    .bot-dot.moving {
-      transform: translate(320px, 120px);
-      background: #10b981;
-      box-shadow: 0 0 24px #10b981;
-    }
-
-    .sim-log-box {
-      background: rgba(15, 23, 42, 0.02);
-      color: #0b1a2b;
-      font-family: 'Inter', monospace;
-      font-size: 0.8rem;
-      padding: 14px 18px;
-      border-radius: 24px;
-      height: 110px;
-      overflow-y: auto;
-      border: 1px solid rgba(0, 0, 0, 0.02);
-      margin-top: 16px;
-    }
-
-    /* TRANSLATOR */
-    .translation-box {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      background: rgba(255, 255, 255, 0.15);
-      padding: 24px;
-      border-radius: 32px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-    }
-
-    .lang-card {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 20px;
-      border-radius: 28px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .speech-preview {
-      min-height: 80px;
-      padding: 16px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 24px;
-      margin-top: 12px;
-      font-size: 0.95rem;
-      border: 1px solid rgba(0, 0, 0, 0.02);
-      line-height: 1.5;
-    }
-
-    .sign-video-container {
-      background: #0b1a2b;
-      height: 160px;
-      border-radius: 28px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: rgba(255, 255, 255, 0.4);
-      position: relative;
-      overflow: hidden;
-      margin-bottom: 12px;
-    }
-
-    /* responsive touches */
-    @media (max-width: 1200px) {
-      .doc-workspace { grid-template-columns: 1fr; height: auto; }
-      .sidebar { width: 240px; }
-      .search-container input { width: 200px; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus AI · Premium Authentication</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           ROOT VARIABLES & RESET
+           ============================================ */
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
+            --primary-glow: rgba(99, 102, 241, 0.3);
+            --secondary: #06b6d4;
+            --accent: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            
+            --bg-start: #0f0c29;
+            --bg-mid: #302b63;
+            --bg-end: #24243e;
+            
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --glass-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-muted: rgba(255, 255, 255, 0.3);
+            
+            --radius-xl: 32px;
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+            
+            --transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--bg-start), var(--bg-mid), var(--bg-end));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        .bg-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(99, 102, 241, 0.15);
+            border-radius: 50%;
+            animation: float-particle linear infinite;
+        }
+
+        .particle:nth-child(1) { left: 10%; animation-duration: 25s; animation-delay: 0s; width: 6px; height: 6px; }
+        .particle:nth-child(2) { left: 20%; animation-duration: 30s; animation-delay: 2s; width: 3px; height: 3px; }
+        .particle:nth-child(3) { left: 35%; animation-duration: 20s; animation-delay: 4s; width: 8px; height: 8px; }
+        .particle:nth-child(4) { left: 50%; animation-duration: 28s; animation-delay: 1s; width: 5px; height: 5px; }
+        .particle:nth-child(5) { left: 65%; animation-duration: 22s; animation-delay: 3s; width: 4px; height: 4px; }
+        .particle:nth-child(6) { left: 75%; animation-duration: 35s; animation-delay: 5s; width: 7px; height: 7px; }
+        .particle:nth-child(7) { left: 85%; animation-duration: 26s; animation-delay: 2s; width: 3px; height: 3px; }
+        .particle:nth-child(8) { left: 92%; animation-duration: 32s; animation-delay: 1s; width: 5px; height: 5px; }
+
+        @keyframes float-particle {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* Glow orbs */
+        .glow-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .glow-orb-1 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15), transparent 70%);
+            top: -100px;
+            right: -100px;
+            animation: pulse-glow 8s ease-in-out infinite;
+        }
+
+        .glow-orb-2 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.1), transparent 70%);
+            bottom: -50px;
+            left: -50px;
+            animation: pulse-glow 10s ease-in-out infinite reverse;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+
+        /* ============================================
+           MAIN CONTAINER
+           ============================================ */
+        .auth-wrapper {
+            width: 100%;
+            max-width: 520px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            padding: 48px 40px 40px;
+            box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        /* Shimmer border effect */
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: var(--radius-xl);
+            padding: 1px;
+            background: linear-gradient(135deg, 
+                rgba(99, 102, 241, 0.2), 
+                rgba(6, 182, 212, 0.1), 
+                rgba(99, 102, 241, 0.2)
+            );
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        /* ============================================
+           HEADER
+           ============================================ */
+        .auth-header {
+            text-align: center;
+            margin-bottom: 36px;
+            position: relative;
+        }
+
+        .logo-wrapper {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 8px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 8px 24px var(--primary-glow);
+            position: relative;
+        }
+
+        .logo-icon::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            opacity: 0.3;
+            filter: blur(8px);
+            z-index: -1;
+        }
+
+        .logo-text {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #ffffff, rgba(255, 255, 255, 0.7));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-text span {
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .auth-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 400;
+            margin-top: 4px;
+        }
+
+        /* ============================================
+           MODE TOGGLE
+           ============================================ */
+        .mode-toggle {
+            display: flex;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 60px;
+            padding: 4px;
+            margin-bottom: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            position: relative;
+        }
+
+        .mode-toggle button {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            letter-spacing: 0.01em;
+        }
+
+        .mode-toggle button.active {
+            color: #ffffff;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.15));
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.1);
+        }
+
+        .mode-toggle button:not(.active):hover {
+            color: var(--text-secondary);
+        }
+
+        /* ============================================
+           ALERT
+           ============================================ */
+        .alert {
+            padding: 14px 20px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 20px;
+            display: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            animation: slideDown 0.3s ease;
+            backdrop-filter: blur(8px);
+            border: 1px solid transparent;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.08);
+            border-color: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.08);
+            border-color: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+        }
+
+        .alert-info {
+            background: rgba(99, 102, 241, 0.08);
+            border-color: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+        }
+
+        /* ============================================
+           FORMS
+           ============================================ */
+        .auth-form {
+            position: relative;
+        }
+
+        .auth-form.hidden {
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            border-radius: var(--radius-sm);
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: var(--transition);
+            overflow: hidden;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: rgba(99, 102, 241, 0.2);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.05);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .input-wrapper.error {
+            border-color: rgba(239, 68, 68, 0.3);
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.05);
+        }
+
+        .input-wrapper.success {
+            border-color: rgba(16, 185, 129, 0.3);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.05);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1rem;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        .input-wrapper:focus-within .input-icon {
+            color: var(--primary-light);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px 16px 14px 46px;
+            background: transparent;
+            border: none;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+            letter-spacing: 0.01em;
+        }
+
+        .input-field::placeholder {
+            color: var(--text-muted);
+            font-weight: 300;
+        }
+
+        .input-field.password-field {
+            padding-right: 48px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transition);
+            padding: 4px;
+        }
+
+        .toggle-password:hover {
+            color: var(--text-secondary);
+        }
+
+        .input-error {
+            color: #f87171;
+            font-size: 0.75rem;
+            margin-top: 4px;
+            display: none;
+            font-weight: 400;
+        }
+
+        .input-error.show {
+            display: block;
+            animation: slideDown 0.2s ease;
+        }
+
+        /* Select */
+        .input-select {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            outline: none;
+            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
+            appearance: none;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='rgba(255,255,255,0.3)' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+        }
+
+        .input-select:focus {
+            border-color: rgba(99, 102, 241, 0.2);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.05);
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .input-select option {
+            background: #1a1a2e;
+            color: white;
+        }
+
+        /* ============================================
+           CHECKBOX
+           ============================================ */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+            cursor: pointer;
+            border-radius: 4px;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+
+        .checkbox-group label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .checkbox-group label a {
+            color: var(--primary-light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .checkbox-group label a:hover {
+            color: #a5b4fc;
+            text-decoration: underline;
+        }
+
+        /* ============================================
+           BUTTON
+           ============================================ */
+        .btn-submit {
+            width: 100%;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: white;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.01em;
+        }
+
+        .btn-submit::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .btn-submit:hover::before {
+            opacity: 1;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px -8px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-submit .btn-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .btn-submit.loading .spinner {
+            display: inline-block;
+        }
+
+        .btn-submit.loading .btn-text {
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ============================================
+           LINKS
+           ============================================ */
+        .auth-links {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .auth-links a {
+            color: var(--primary-light);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .auth-links a:hover {
+            color: #a5b4fc;
+            text-decoration: underline;
+        }
+
+        /* ============================================
+           ADDITIONAL FIELDS (Patient)
+           ============================================ */
+        .additional-fields {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease, margin 0.4s ease;
+            opacity: 0;
+            margin: 0;
+        }
+
+        .additional-fields.open {
+            max-height: 800px;
+            opacity: 1;
+            margin: 4px 0 8px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        /* ============================================
+           PASSWORD STRENGTH
+           ============================================ */
+        .password-strength {
+            margin-top: 8px;
+        }
+
+        .strength-bar {
+            height: 3px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.04);
+            overflow: hidden;
+        }
+
+        .strength-bar .fill {
+            height: 100%;
+            transition: width 0.4s ease, background 0.4s ease;
+            width: 0%;
+            border-radius: 4px;
+        }
+
+        .strength-text {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            transition: var(--transition);
+        }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 600px) {
+            .auth-container {
+                padding: 32px 24px 28px;
+                border-radius: var(--radius-lg);
+            }
+
+            .logo-text {
+                font-size: 1.6rem;
+            }
+
+            .logo-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .mode-toggle button {
+                font-size: 0.8rem;
+                padding: 10px 16px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .auth-container {
+                padding: 24px 16px 20px;
+                border-radius: var(--radius-md);
+            }
+
+            .auth-header {
+                margin-bottom: 24px;
+            }
+
+            .input-field {
+                font-size: 0.85rem;
+                padding: 12px 14px 12px 40px;
+            }
+
+            .btn-submit {
+                padding: 14px 24px;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* ============================================
+           SCROLLBAR
+           ============================================ */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.5);
+        }
+
+        /* ============================================
+           UTILITY
+           ============================================ */
+        .text-center { text-align: center; }
+        .mt-4 { margin-top: 16px; }
+        .gap-2 { gap: 8px; }
+    </style>
 </head>
 <body>
 
-  <!-- AUTH GATEWAY -->
-  <div id="auth-gateway">
-    <div class="auth-container">
-      <div class="auth-header">
-        <h1>Nexus <span>· AI</span></h1>
-        <p>Smart Healthcare Ecosystem</p>
-      </div>
-      <form onsubmit="executeLogin(event)">
-        <div class="form-group">
-          <label>Access level</label>
-          <select class="input-element" id="user-role" required>
-            <option value="" disabled selected>Select role …</option>
-            <option value="patient">Patient Portal</option>
-            <option value="doctor">Physician Terminal</option>
-            <option value="admin">Hospital Admin</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>ID</label>
-          <input type="text" class="input-element" placeholder="Enter ID" value="user123">
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" class="input-element" placeholder="••••••••" value="password">
-        </div>
-        <button type="submit" class="btn-submit">Authenticate</button>
-      </form>
+    <!-- ============================================
+    BACKGROUND EFFECTS
+    ============================================ -->
+    <div class="bg-particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
     </div>
-  </div>
+    <div class="glow-orb glow-orb-1"></div>
+    <div class="glow-orb glow-orb-2"></div>
 
-  <!-- APP SHELL -->
-  <div id="app-ecosystem">
-    <aside class="sidebar">
-      <div class="sidebar-brand">Nexus <span>· AI</span></div>
-      <ul class="sidebar-nav" id="dynamic-nav"></ul>
-    </aside>
+    <!-- ============================================
+    AUTH CONTAINER
+    ============================================ -->
+    <div class="auth-wrapper">
+        <div class="auth-container">
 
-    <main class="main-workspace">
-      <header class="top-navbar">
-        <div class="search-container"><input type="text" placeholder="Search …"></div>
-        <div class="user-menu">
-          <span class="role-pill" id="display-role">Loading</span>
-          <button class="btn-outline" onclick="location.reload()">Logout</button>
-        </div>
-      </header>
-
-      <div class="dashboard-canvas">
-
-        <!-- DASHBOARD (admin) -->
-        <div id="view-dashboard" class="page-view">
-          <h2 class="page-title">Command center</h2>
-          <div class="kpi-grid">
-            <div class="kpi-card"><div class="kpi-title">Inpatients</div><div class="kpi-value">1,248</div></div>
-            <div class="kpi-card"><div class="kpi-title">AI alerts</div><div class="kpi-value">14</div></div>
-            <div class="kpi-card"><div class="kpi-title">Robots active</div><div class="kpi-value">22/25</div></div>
-          </div>
-        </div>
-
-        <!-- PATIENT DASHBOARD -->
-        <div id="view-patient-dashboard" class="page-view">
-          <h2 class="page-title">Health overview</h2>
-          <div class="kpi-grid">
-            <div class="kpi-card"><div class="kpi-title">Health score</div><div class="kpi-value">92</div></div>
-            <div class="kpi-card"><div class="kpi-title">Next appointment</div><div class="kpi-value" style="font-size:1.2rem;">Tomorrow 09:00</div></div>
-            <div class="kpi-card"><div class="kpi-title">BP reading</div><div class="kpi-value">135/88</div></div>
-          </div>
-        </div>
-
-        <!-- DOCTOR WORKSPACE -->
-        <div id="view-doctor-workspace" class="page-view">
-          <h2 class="page-title">Clinical command</h2>
-          <div class="doc-workspace">
-            <div class="doc-panel">
-              <div class="panel-header"><span>Queue</span><span class="badge badge-warning">4</span></div>
-              <div class="panel-body">
-                <div class="queue-item active"><div><strong>John Doe</strong> <span class="badge badge-danger">High</span></div><div style="font-size:0.8rem;color:#4a5f7a;">Waiting 15m</div></div>
-                <div class="queue-item"><div><strong>Mary Smith</strong> <span class="badge badge-warning">Med</span></div><div style="font-size:0.8rem;color:#4a5f7a;">Waiting 22m</div></div>
-              </div>
-            </div>
-            <div class="doc-panel">
-              <div class="panel-header"><span>EMR & notes</span><button class="btn-action btn-outline" style="padding:4px 14px;font-size:0.75rem;">History</button></div>
-              <div class="panel-body">
-                <div style="display:flex;gap:16px;align-items:center;margin-bottom:20px;">
-                  <div class="patient-avatar">JD</div>
-                  <div><h3 style="font-weight:600;">John Doe</h3><div style="color:#4a5f7a;font-size:0.85rem;">45y · Male</div></div>
+            <!-- Header -->
+            <div class="auth-header">
+                <div class="logo-wrapper">
+                    <div class="logo-icon">⚡</div>
+                    <div class="logo-text">Nexus<span>AI</span></div>
                 </div>
-                <div class="dictation-box" style="position:relative;">
-                  <textarea id="doctor-notes" placeholder="Clinical notes …"></textarea>
-                  <button class="dictate-btn" id="btn-dictate" onclick="toggleDictation()">🎙</button>
+                <div class="auth-subtitle">Smart Healthcare Ecosystem</div>
+            </div>
+
+            <!-- Mode Toggle -->
+            <div class="mode-toggle">
+                <button class="active" id="btnLogin" onclick="switchMode('login')">
+                    <span>→</span> Sign In
+                </button>
+                <button id="btnRegister" onclick="switchMode('register')">
+                    <span>+</span> Create Account
+                </button>
+            </div>
+
+            <!-- Alert -->
+            <div id="alertMessage" class="alert"></div>
+
+            <!-- ==========================================
+            LOGIN FORM
+            ========================================== -->
+            <form id="loginForm" class="auth-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Username or Email</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">👤</span>
+                        <input type="text" id="loginUsername" class="input-field" placeholder="Enter your username or email" required autocomplete="username">
+                    </div>
+                    <div class="input-error" id="loginUsernameError"></div>
                 </div>
-                <div class="action-grid">
-                  <button class="action-btn" onclick="alert('Lab order sent')">Order lab</button>
-                  <button class="action-btn" onclick="switchView('view-telemedicine',null)">Video consult</button>
+
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" id="loginPassword" class="input-field password-field" placeholder="Enter your password" required autocomplete="current-password">
+                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility('loginPassword', this)" aria-label="Toggle password visibility">👁️</button>
+                    </div>
+                    <div class="input-error" id="loginPasswordError"></div>
                 </div>
-              </div>
-            </div>
-            <div class="doc-panel">
-              <div class="panel-header"><span>AI decision</span><span>⚡</span></div>
-              <div class="panel-body">
-                <div class="alert-card high"><strong>⚠ Critical</strong><div style="font-size:0.9rem;">BP 150/95 – hypertensive risk</div></div>
-                <div class="ai-suggestion"><strong>AI next steps</strong><br><br>1. Basic metabolic panel<br>2. Increase Lisinopril to 20mg<br><button class="btn-action" style="width:100%;margin-top:12px;font-size:0.8rem;">Apply protocol</button></div>
-              </div>
-            </div>
-          </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="rememberMe">
+                    <label for="rememberMe">Remember me</label>
+                </div>
+
+                <button type="submit" class="btn-submit" id="loginBtn">
+                    <span class="btn-content">
+                        <span class="btn-text">Sign In</span>
+                        <span class="spinner"></span>
+                    </span>
+                </button>
+
+                <div class="auth-links">
+                    <a href="#" onclick="showForgotPassword()">Forgot password?</a>
+                </div>
+            </form>
+
+            <!-- ==========================================
+            REGISTER FORM
+            ========================================== -->
+            <form id="registerForm" class="auth-form hidden" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">👤</span>
+                        <input type="text" id="regFullName" class="input-field" placeholder="Dr. John Doe" required autocomplete="name">
+                    </div>
+                    <div class="input-error" id="regFullNameError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Username</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">@</span>
+                        <input type="text" id="regUsername" class="input-field" placeholder="Choose a unique username" required autocomplete="username">
+                    </div>
+                    <div class="input-error" id="regUsernameError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">✉️</span>
+                        <input type="email" id="regEmail" class="input-field" placeholder="you@example.com" required autocomplete="email">
+                    </div>
+                    <div class="input-error" id="regEmailError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">📱</span>
+                        <input type="tel" id="regPhone" class="input-field" placeholder="+250 788 000 000" autocomplete="tel">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Role</label>
+                    <select class="input-select" id="regRole" onchange="togglePatientFields()">
+                        <option value="patient">🩺 Patient</option>
+                        <option value="doctor">👨‍⚕️ Doctor</option>
+                        <option value="nurse">👩‍⚕️ Nurse</option>
+                        <option value="pharmacist">💊 Pharmacist</option>
+                        <option value="admin">⚙️ Administrator</option>
+                    </select>
+                </div>
+
+                <!-- Patient Fields -->
+                <div class="additional-fields open" id="patientFields">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Patient ID</label>
+                            <input type="text" id="regPatientId" class="input-field" placeholder="PAT-XXXX">
+                        </div>
+                        <div class="form-group">
+                            <label>Blood Type</label>
+                            <select class="input-select" id="regBloodType">
+                                <option value="">Select</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Date of Birth</label>
+                        <input type="date" id="regDob" class="input-field">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Allergies</label>
+                        <input type="text" id="regAllergies" class="input-field" placeholder="e.g., Penicillin, Peanuts">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Chronic Conditions</label>
+                        <input type="text" id="regChronicConditions" class="input-field" placeholder="e.g., Hypertension, Diabetes">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" id="regPassword" class="input-field password-field" placeholder="Create a strong password" required oninput="checkPasswordStrength(this.value)" autocomplete="new-password">
+                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility('regPassword', this)" aria-label="Toggle password visibility">👁️</button>
+                    </div>
+                    <div class="password-strength">
+                        <div class="strength-bar"><div class="fill" id="strengthFill"></div></div>
+                        <div class="strength-text" id="strengthText">Enter a strong password</div>
+                    </div>
+                    <div class="input-error" id="regPasswordError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" id="regConfirmPassword" class="input-field password-field" placeholder="Confirm your password" required autocomplete="new-password">
+                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility('regConfirmPassword', this)" aria-label="Toggle password visibility">👁️</button>
+                    </div>
+                    <div class="input-error" id="regConfirmPasswordError"></div>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="termsCheck" required>
+                    <label for="termsCheck">
+                        I agree to the <a href="#" onclick="event.preventDefault();">Terms of Service</a> and <a href="#" onclick="event.preventDefault();">Privacy Policy</a>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-submit" id="registerBtn">
+                    <span class="btn-content">
+                        <span class="btn-text">Create Account</span>
+                        <span class="spinner"></span>
+                    </span>
+                </button>
+
+                <div class="auth-links">
+                    Already have an account? <a href="#" onclick="switchMode('login')">Sign In</a>
+                </div>
+            </form>
+
         </div>
+    </div>
 
-        <!-- TRANSLATOR -->
-        <div id="view-translator" class="page-view">
-          <h2 class="page-title">Medical translator · sign</h2>
-          <div class="module-card">
-            <div class="module-header"><span>Spoken translation</span><span class="badge badge-success">Neural</span></div>
-            <div class="translation-box">
-              <div class="lang-card"><label style="font-weight:500;">Doctor (source)</label>
-                <select class="input-element" style="margin:8px 0 12px;"><option>English</option><option>French</option></select>
-                <div class="speech-preview" id="trans-src-text">"Good morning, we need to adjust your medication."</div>
-              </div>
-              <div class="lang-card"><label style="font-weight:500;">Patient (target)</label>
-                <select class="input-element" style="margin:8px 0 12px;"><option>Kinyarwanda</option><option>Swahili</option></select>
-                <div class="speech-preview" id="trans-tgt-text" style="background:rgba(59,130,246,0.02);">"Mwaramutse, tugomba guhindura imiti."</div>
-              </div>
-            </div>
-            <div style="display:flex;gap:14px;justify-content:center;margin-top:14px;">
-              <button class="btn-action" id="btn-listen-trans" onclick="toggleTranslationMic()">🎙 Start listening</button>
-              <button class="btn-action btn-outline" onclick="alert('audio play')">🔊 Play</button>
-            </div>
-          </div>
-          <div class="module-card" style="margin-top:20px;">
-            <div class="module-header"><span>Sign language</span><span class="badge badge-success">Vision</span></div>
-            <div class="translation-box">
-              <div class="lang-card"><label>Patient signing (camera)</label>
-                <div class="sign-video-container"><video id="sign-cam-video" autoplay muted style="display:none;width:100%;height:100%;object-fit:cover;"></video><div id="sign-cam-placeholder">📷 offline</div></div>
-                <button class="btn-action btn-outline" style="width:100%;margin-bottom:10px;" onclick="startSignCam()">Activate camera</button>
-                <div class="speech-preview" id="sign-to-text-output" style="min-height:40px;">Waiting for gestures…</div>
-              </div>
-              <div class="lang-card"><label>Text → sign avatar</label>
-                <div class="sign-video-container" style="background:#dce4ed;"><div style="font-size:3.5rem;">🤖</div><div id="avatar-animating" style="display:none;position:absolute;bottom:8px;background:rgba(255,255,255,0.6);padding:4px 16px;border-radius:40px;">Generating…</div></div>
-                <input type="text" id="text-to-sign-input" class="input-element" placeholder="Type message …" value="Please take a deep breath." style="margin:8px 0;">
-                <button class="btn-action" style="width:100%;background:#3b82f6;" onclick="generateSignAvatar()">Generate sign avatar</button>
-              </div>
-            </div>
-          </div>
-        </div>
+    <!-- ============================================
+    JAVASCRIPT
+    ============================================ -->
+    <script>
+        // =============================================
+        // CONFIGURATION
+        // =============================================
+        const API_URL = 'http://localhost:5000/api';
 
-        <!-- MESSENGER -->
-        <div id="view-messenger" class="page-view">
-          <h2 class="page-title">Care messenger</h2>
-          <div class="messenger-layout">
-            <div class="messenger-sidebar"><div style="padding:18px 22px;font-weight:600;border-bottom:1px solid rgba(0,0,0,0.02);">Active</div>
-              <div class="contact-item active"><strong>Dr. Sarah Smith</strong><div style="font-size:0.8rem;color:#4a5f7a;">Cardiology</div></div>
-            </div>
-            <div class="messenger-chat-area">
-              <div class="chat-history" id="chat-history-box"><div class="chat-bubble received">Hello, I reviewed your AI report. How is your BP?</div></div>
-              <div class="chat-input-area"><input type="text" id="chat-input-field" placeholder="Type …"><button class="btn-action" style="border-radius:40px;padding:12px 28px;" onclick="sendChatMsg()">Send</button></div>
-            </div>
-          </div>
-        </div>
+        // =============================================
+        // UI HELPERS
+        // =============================================
 
-        <!-- SYMPTOM CHECKER -->
-        <div id="view-symptom" class="page-view">
-          <h2 class="page-title">Symptom diagnostics</h2>
-          <div class="module-grid">
-            <div class="module-card"><div class="module-header"><span>Visual recorder</span></div>
-              <video id="live-video" autoplay muted style="width:100%;border-radius:28px;background:#0b1a2b;"></video>
-              <div style="display:flex;gap:10px;margin-top:12px;"><button class="btn-action" style="flex:1;" onclick="startRec()">Camera on</button><button class="btn-action" style="flex:1;background:#ef4444;display:none;" id="btn-stop-record" onclick="stopRec()">Stop</button></div>
-            </div>
-            <div class="module-card"><div class="module-header"><span>Text triage</span></div>
-              <div class="chat-history" id="triage-history" style="height:200px;border-radius:28px;border:1px solid rgba(0,0,0,0.02);margin-bottom:14px;"><div class="chat-bubble received"><strong>AI:</strong> Describe symptoms.</div></div>
-              <div style="display:flex;gap:10px;"><input type="text" id="triage-input" placeholder="e.g. fever …" style="flex:1;padding:12px 20px;border-radius:40px;border:1px solid rgba(0,0,0,0.02);"><button class="btn-action" onclick="sendTriageMsg()">Analyze</button></div>
-            </div>
-          </div>
-        </div>
+        function switchMode(mode) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const btnLogin = document.getElementById('btnLogin');
+            const btnRegister = document.getElementById('btnRegister');
+            const alert = document.getElementById('alertMessage');
 
-        <!-- TELEMEDICINE -->
-        <div id="view-telemedicine" class="page-view">
-          <h2 class="page-title">Telemedicine</h2>
-          <div class="module-card">
-            <div class="module-header"><span>Live consultation</span><span class="badge badge-success">Encrypted</span></div>
-            <div class="tele-container">
-              <video id="tele-remote-video" autoplay playsinline style="width:100%;height:100%;object-fit:cover;display:none;"></video>
-              <video id="tele-local-video" autoplay playsinline muted class="tele-pip" style="display:none;"></video>
-              <div id="tele-placeholder" style="color:white;"><div style="font-size:3.5rem;">📹</div><h3>Ready</h3></div>
-            </div>
-            <div style="display:flex;gap:14px;justify-content:center;">
-              <button class="btn-action" id="btn-start-tele" onclick="startTeleCall()">Start call</button>
-              <button class="btn-action btn-outline" id="btn-mute-tele" style="display:none;" onclick="toggleTeleMute()">Mute</button>
-              <button class="btn-action" style="background:#ef4444;display:none;" id="btn-end-tele" onclick="endTeleCall()">End</button>
-            </div>
-          </div>
-        </div>
+            alert.classList.remove('show');
+            alert.textContent = '';
 
-        <!-- ROBOTICS -->
-        <div id="view-robotics" class="page-view">
-          <h2 class="page-title">Robotics command</h2>
-          <div class="module-grid">
-            <div class="module-card"><div class="module-header"><span>Dispatch order</span></div>
-              <form onsubmit="submitRobotOrder(event)">
-                <div class="form-group"><label>Unit</label><select class="input-element" id="order-robot-select"><option>MediBot-01</option><option>CleanBot-X</option></select></div>
-                <div class="form-group"><label>Destination</label><select class="input-element" id="order-target-select"><option>Room 302</option><option>Operating Room 1</option></select></div>
-                <div class="form-group"><label>Payload</label><input type="text" class="input-element" id="order-payload" value="Amoxicillin 500mg"></div>
-                <button type="submit" class="btn-submit" style="background:#10b981;border-radius:40px;">🚀 Send</button>
-              </form>
-            </div>
-            <div class="module-card"><div class="module-header"><span>Simulation</span><span class="badge badge-warning" id="robot-status-badge">Docked</span></div>
-              <div class="sim-container"><div class="sim-grid"><div class="sim-zone" style="border-color:#10b981;color:#10b981;">Pharmacy</div><div class="sim-zone">Corridor</div><div class="sim-zone">Elevator</div><div class="sim-zone">Corridor</div><div class="sim-zone" id="sim-target-zone" style="border-color:#3b82f6;color:#3b82f6;">Room 302</div></div><div class="bot-dot" id="sim-robot">M1</div></div>
-              <div style="display:flex;gap:10px;margin-top:12px;"><button class="btn-action btn-outline" style="flex:1;" onclick="resetSimulation()">Reset</button></div>
-              <div class="sim-log-box" id="sim-log">> Fleet online.</div>
-            </div>
-          </div>
-        </div>
+            if (mode === 'login') {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                btnLogin.classList.add('active');
+                btnRegister.classList.remove('active');
+            } else {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                btnRegister.classList.add('active');
+                btnLogin.classList.remove('active');
+            }
 
-        <!-- HMIS -->
-        <div id="view-hmis" class="page-view">
-          <h2 class="page-title">HMIS / DHIS2 sync</h2>
-          <div class="module-card"><button class="btn-action" style="width:100%;" onclick="syncDHIS2()">Force sync</button></div>
-        </div>
+            // Clear errors
+            document.querySelectorAll('.input-error').forEach(el => el.classList.remove('show'));
+            document.querySelectorAll('.input-wrapper').forEach(el => el.classList.remove('error', 'success'));
+        }
 
-        <!-- EMR -->
-        <div id="view-emr" class="page-view">
-          <h2 class="page-title">Medical records</h2>
-          <div class="module-card"><div class="module-header"><span>#PAT-8942</span></div><p>Vitals: 150/95 mmHg</p></div>
-        </div>
+        function togglePasswordVisibility(inputId, button) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                button.textContent = '👁️';
+            }
+        }
 
-        <!-- INSURANCE -->
-        <div id="view-insurance" class="page-view">
-          <h2 class="page-title">Billing</h2>
-          <div class="module-card"><input type="number" id="pay-amount" placeholder="Amount (RWF)" style="width:100%;padding:14px;border-radius:40px;border:1px solid rgba(0,0,0,0.02);margin-bottom:12px;"><button class="btn-action" style="width:100%;background:#10b981;" onclick="processPay()">Pay</button></div>
-        </div>
+        function togglePatientFields() {
+            const role = document.getElementById('regRole').value;
+            const fields = document.getElementById('patientFields');
+            if (role === 'patient') {
+                fields.classList.add('open');
+            } else {
+                fields.classList.remove('open');
+            }
+        }
 
-        <!-- SETTINGS -->
-        <div id="view-settings" class="page-view">
-          <h2 class="page-title">Settings</h2>
-          <div class="module-grid">
-            <div class="module-card"><div class="module-header"><span>Security</span></div><label style="font-weight:500;">2FA</label><select class="input-element" style="margin:8px 0 14px;"><option>Enforced (SMS)</option></select><button class="btn-action btn-outline" style="width:100%;">Register biometric</button></div>
-            <div class="module-card"><div class="module-header"><span>Reminders</span></div><label><input type="checkbox" checked> WhatsApp</label><br><br><label><input type="checkbox" checked> SMS</label></div>
-          </div>
-        </div>
-
-      </div>
-    </main>
-  </div>
-
-  <script>
-    // ---- RBAC ----
-    const roleMenus = {
-      patient: `
-        <div class="nav-label">Health</div>
-        <li><a class="nav-link active" onclick="switchView('view-patient-dashboard', this)">Overview</a></li>
-        <li><a class="nav-link" onclick="switchView('view-symptom', this)">Symptom checker</a></li>
-        <li><a class="nav-link" onclick="switchView('view-telemedicine', this)">Telemedicine</a></li>
-        <li><a class="nav-link" onclick="switchView('view-messenger', this)">Messenger</a></li>
-        <li><a class="nav-link" onclick="switchView('view-translator', this)">Translator</a></li>
-        <li><a class="nav-link" onclick="switchView('view-emr', this)">Records</a></li>
-        <div class="nav-label">Admin</div>
-        <li><a class="nav-link" onclick="switchView('view-insurance', this)">Billing</a></li>
-        <li><a class="nav-link" onclick="switchView('view-settings', this)">Settings</a></li>
-      `,
-      doctor: `
-        <div class="nav-label">Clinical</div>
-        <li><a class="nav-link active" onclick="switchView('view-doctor-workspace', this)">Workspace</a></li>
-        <li><a class="nav-link" onclick="switchView('view-messenger', this)">Messages</a></li>
-        <li><a class="nav-link" onclick="switchView('view-telemedicine', this)">Telemedicine</a></li>
-        <li><a class="nav-link" onclick="switchView('view-translator', this)">Translator</a></li>
-        <li><a class="nav-link" onclick="switchView('view-robotics', this)">Robotics</a></li>
-        <div class="nav-label">System</div>
-        <li><a class="nav-link" onclick="switchView('view-settings', this)">Settings</a></li>
-      `,
-      admin: `
-        <div class="nav-label">Command</div>
-        <li><a class="nav-link active" onclick="switchView('view-dashboard', this)">Analytics</a></li>
-        <li><a class="nav-link" onclick="switchView('view-robotics', this)">Robotics</a></li>
-        <li><a class="nav-link" onclick="switchView('view-hmis', this)">DHIS2 sync</a></li>
-        <div class="nav-label">System</div>
-        <li><a class="nav-link" onclick="switchView('view-settings', this)">Settings</a></li>
-      `
-    };
-
-    function executeLogin(e) {
-      e.preventDefault();
-      const sel = document.getElementById('user-role');
-      const role = sel.value;
-      const roleName = sel.options[sel.selectedIndex].text;
-      document.getElementById('auth-gateway').style.opacity = '0';
-      setTimeout(() => {
-        document.getElementById('auth-gateway').classList.add('hidden');
-        document.getElementById('app-ecosystem').style.display = 'flex';
-      }, 400);
-      document.getElementById('display-role').innerText = roleName;
-      document.getElementById('dynamic-nav').innerHTML = roleMenus[role];
-      if(role === 'doctor') switchView('view-doctor-workspace', document.querySelector('.nav-link'));
-      else if(role === 'patient') switchView('view-patient-dashboard', document.querySelector('.nav-link'));
-      else switchView('view-dashboard', document.querySelector('.nav-link'));
-    }
-
-    function switchView(viewId, el) {
-      if(el) { document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active')); el.classList.add('active'); }
-      document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
-      document.getElementById(viewId).classList.add('active');
-    }
-
-    // ---- TRANSLATOR ----
-    let isTransListening = false;
-    function toggleTranslationMic() {
-      const btn = document.getElementById('btn-listen-trans');
-      const src = document.getElementById('trans-src-text');
-      const tgt = document.getElementById('trans-tgt-text');
-      if(!isTransListening) {
-        isTransListening = true;
-        btn.innerText = '⏹ Stop';
-        btn.style.background = '#ef4444';
-        src.innerText = 'Listening …';
-        tgt.innerText = 'Translating …';
-        setTimeout(() => { if(isTransListening) { src.innerText = '"Please describe the pain."'; tgt.innerText = '"Bwira aho ububabare buri."'; } }, 1800);
-      } else {
-        isTransListening = false;
-        btn.innerText = '🎙 Start';
-        btn.style.background = '#3b82f6';
-      }
-    }
-
-    let signStream = null;
-    async function startSignCam() {
-      try {
-        signStream = await navigator.mediaDevices.getUserMedia({ video: true });
-        document.getElementById('sign-cam-video').srcObject = signStream;
-        document.getElementById('sign-cam-video').style.display = 'block';
-        document.getElementById('sign-cam-placeholder').style.display = 'none';
-        setTimeout(() => { document.getElementById('sign-to-text-output').innerHTML = '<strong>Gesture:</strong> "Chest pain"'; }, 2500);
-      } catch(e) { alert('Camera access denied'); }
-    }
-
-    function generateSignAvatar() {
-      const anim = document.getElementById('avatar-animating');
-      anim.style.display = 'block';
-      setTimeout(() => { anim.innerHTML = '✅ Signing …'; setTimeout(() => { anim.style.display = 'none'; anim.innerHTML = 'Generating…'; }, 1800); }, 1600);
-    }
-
-    // ---- ROBOTICS ----
-    function submitRobotOrder(e) {
-      e.preventDefault();
-      const target = document.getElementById('order-target-select').value;
-      document.getElementById('sim-target-zone').innerHTML = `${target}<br>(Target)`;
-      document.getElementById('sim-robot').classList.add('moving');
-      document.getElementById('robot-status-badge').innerText = `→ ${target}`;
-      document.getElementById('sim-log').innerHTML += `> Dispatch to ${target}<br>`;
-    }
-
-    function resetSimulation() {
-      document.getElementById('sim-robot').classList.remove('moving');
-      document.getElementById('robot-status-badge').innerText = 'Docked';
-      document.getElementById('sim-log').innerHTML += '> Reset<br>';
-    }
-
-    // ---- TELEMEDICINE ----
-    let teleStream = null;
-    async function startTeleCall() {
-      try {
-        teleStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        document.getElementById('tele-local-video').srcObject = teleStream;
-        document.getElementById('tele-local-video').style.display = 'block';
-        document.getElementById('tele-remote-video').srcObject = teleStream;
-        document.getElementById('tele-remote-video').style.display = 'block';
-        document.getElementById('tele-placeholder').style.display = 'none';
-        document.getElementById('btn-start-tele').style.display = 'none';
-        document.getElementById('btn-mute-tele').style.display = 'inline-block';
-        document.getElementById('btn-end-tele').style.display = 'inline-block';
-      } catch(e) { alert('Permissions required'); }
-    }
-
-    function endTeleCall() {
-      if(teleStream) { teleStream.getTracks().forEach(t => t.stop()); teleStream = null; }
-      document.getElementById('tele-local-video').style.display = 'none';
-      document.getElementById('tele-remote-video').style.display = 'none';
-      document.getElementById('tele-placeholder').style.display = 'block';
-      document.getElementById('btn-start-tele').style.display = 'inline-block';
-      document.getElementById('btn-end-tele').style.display = 'none';
-      document.getElementById('btn-mute-tele').style.display = 'none';
-    }
-
-    // ---- DICTATION ----
-    let isDictating = false;
-    function toggleDictation() {
-      const btn = document.getElementById('btn-dictate');
-      const ta = document.getElementById('doctor-notes');
-      if(!isDictating) {
-        isDictating = true; btn.innerText = '⏹';
-        ta.value += '\n[AI listening] ';
-        setTimeout(() => { if(isDictating) ta.value = ta.value.replace('[AI listening] ', 'Patient presents with acute hypertension. Protocol adjusted.'); }, 1500);
-      } else { isDictating = false; btn.innerText = '🎙'; }
-    }
-
-    // ---- CHAT ----
-    function sendChatMsg() {
-      const inp = document.getElementById('chat-input-field');
-      if(!inp.value) return;
-      document.getElementById('chat-history-box').innerHTML += `<div class="chat-bubble sent">${inp.value}</div>`;
-      inp.value = '';
-    }
-
-    // ---- SYMPTOM ----
-    function startRec() {
-      document.getElementById('btn-stop-record').style.display = 'inline-block';
-      alert('Camera started (simulated)');
-    }
-    function stopRec() {
-      document.getElementById('btn-stop-record').style.display = 'none';
-      alert('Analysis complete');
-    }
-
-    function sendTriageMsg() {
-      const inp = document.getElementById('triage-input');
-      if(!inp.value) return;
-      document.getElementById('triage-history').innerHTML += `<div class="chat-bubble sent">${inp.value}</div>`;
-      setTimeout(() => {
-        document.getElementById('triage-history').innerHTML += `<div class="chat-bubble received"><strong>AI:</strong> Based on symptoms, consider viral infection. Stay hydrated.</div>`;
-      }, 400);
-      inp.value = '';
-    }
-
-    // ---- HMIS ----
-    function syncDHIS2() { alert('Sync triggered (simulated)'); }
-
-    // ---- BILLING ----
-    function processPay() {
-      const amt = document.getElementById('pay-amount').value;
-      if(!amt) return alert('Enter amount');
-      alert(`Payment of ${amt} RWF simulated.`);
-    }
-  </script>
-</body>
-</html>
-```
+        function showAlert(message, type = 'error') {
+            const alert = document.getElementById('alertMessage');
