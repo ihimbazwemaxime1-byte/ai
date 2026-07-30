@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextGen Hospital Operating System</title>
+    <style>
+        /* === 1. GLOBAL VARIABLES & RESET === */
+        :root {
+            --sidebar-bg: #0f172a;
+            --sidebar-text: #94a3b8;
+            --sidebar-hover: #1e293b;
+            --sidebar-active: #38bdf8;
+            
+            --bg-main: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            
+            --primary: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            
+            --radius: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+        /* === 2. SIDEBAR NAVIGATION === */
+        .sidebar {
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+        }
+        .sidebar h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sidebar h1 span { color: var(--sidebar-active); }
+        
+        .nav-menu { list-style: none; flex: 1; }
+        .nav-menu li { margin-bottom: 8px; }
+        .nav-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--sidebar-text);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .nav-menu a:hover, .nav-menu a.active {
+            background-color: var(--sidebar-hover);
+            color: var(--sidebar-active);
+        }
+
+        /* === 3. MAIN WORKSPACE === */
+        .workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        /* === 4. TOP HEADER === */
+        .top-header {
+            background-color: var(--card-bg);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .search-bar {
+            width: 400px;
+            padding: 10px 16px;
+            border: 1px solid #cbd5e0;
+            border-radius: 20px;
+            background-color: #f8fafc;
+        }
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-weight: 600;
+        }
+        .badge {
+            background-color: #dbeafe;
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        /* === 5. DASHBOARD GRID LAYOUT === */
+        .dashboard-content { padding: 40px; }
+        .page-title { margin-bottom: 24px; font-size: 1.8rem; color: var(--text-main); }
+
+        /* KPI Stats Row */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        .kpi-card {
+            background-color: var(--card-bg);
+            padding: 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border-top: 4px solid var(--primary);
+        }
+        .kpi-card:nth-child(2) { border-top-color: var(--warning); }
+        .kpi-card:nth-child(3) { border-top-color: var(--success); }
+        .kpi-card:nth-child(4) { border-top-color: #8b5cf6; }
+        
+        .kpi-title { color: var(--text-muted); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; }
+        .kpi-value { font-size: 2rem; font-weight: 700; color: var(--text-main); }
+        .kpi-subtext { font-size: 0.85rem; color: var(--success); margin-top: 8px; display: block; }
+
+        /* Main Modules Row (AI Triage & EMR) */
+        .modules-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        .module-card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            padding: 24px;
+        }
+        .module-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .module-title { font-size: 1.2rem; font-weight: 600; }
+
+        /* AI Triage UI */
+        .ai-chat-box {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            height: 250px;
+            margin-bottom: 16px;
+            border: 1px solid #e2e8f0;
+            overflow-y: auto;
+        }
+        .ai-message { background-color: #dbeafe; padding: 12px; border-radius: 8px; margin-bottom: 12px; width: 80%; }
+        .patient-message { background-color: var(--card-bg); border: 1px solid #cbd5e0; padding: 12px; border-radius: 8px; margin-bottom: 12px; width: 80%; margin-left: 20%; }
+        
+        .ai-input-group { display: flex; gap: 12px; }
+        .ai-input-group input { flex: 1; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; }
+        .btn-send { background-color: var(--primary); color: white; border: none; padding: 0 24px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        /* Robot Status List */
+        .robot-list { list-style: none; }
+        .robot-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .robot-item:last-child { border-bottom: none; }
+        .status-dot {
+            height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 8px;
+        }
+        .status-active { background-color: var(--success); }
+        .status-charging { background-color: var(--warning); }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <h1>🏥 NextGen <span>Health</span></h1>
+        <ul class="nav-menu">
+            <li><a href="#" class="active">📊 System Overview</a></li>
+            <li><a href="#">🧠 AI Triage Engine</a></li>
+            <li><a href="#">📁 Electronic Records</a></li>
+            <li><a href="#">🤖 Robot Dispatch</a></li>
+            <li><a href="#">📹 Telemedicine Calls</a></li>
+            <li><a href="#">⚙️ Settings & Security</a></li>
+        </ul>
+    </aside>
+
+    <!-- MAIN WORKSPACE -->
+    <div class="workspace">
+        
+        <!-- TOP HEADER -->
+        <header class="top-header">
+            <input type="text" class="search-bar" placeholder="Search patient ID, medical records, or symptoms...">
+            <div class="user-profile">
+                <span class="badge">Doctor Portal</span>
+                <div class="avatar">Dr. Sarah Smith</div>
+            </div>
+        </header>
+
+        <!-- DASHBOARD CONTENT -->
+        <div class="dashboard-content">
+            <h2 class="page-title">Global Command Center</h2>
+
+            <!-- KPI STATS -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-title">Active Patients</div>
+                    <div class="kpi-value">1,248</div>
+                    <span class="kpi-subtext">↑ 12% from last month</span>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">AI Triage Alerts</div>
+                    <div class="kpi-value">14</div>
+                    <span class="kpi-subtext" style="color: var(--warning);">High risk cases pending</span>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Robot Fleet Status</div>
+                    <div class="kpi-value">22 / 25</div>
+                    <span class="kpi-subtext">Autonomous units online</span>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Telemedicine Today</div>
+                    <div class="kpi-value">45</div>
+                    <span class="kpi-subtext" style="color: var(--sidebar-active);">Scheduled calls</span>
+                </div>
+            </div>
+
+            <!-- MODULES -->
+            <div class="modules-grid">
+                
+                <!-- AI Triage Interface -->
+                <div class="module-card">
+                    <div class="module-header">
+                        <div class="module-title">🧠 Live AI Triage Analysis</div>
+                        <span class="badge">Processing Patient #8942</span>
+                    </div>
+                    <div class="ai-chat-box">
+                        <div class="patient-message">
+                            <strong>Patient Input:</strong> "I have had a severe headache and blurred vision since yesterday morning. Also feeling very dizzy."
+                        </div>
+                        <div class="ai-message">
+                            <strong>AI Analysis:</strong> Symptoms indicate potential hypertension or neurological distress. <br><br>
+                            <em>Risk Score: 8.5/10 (High).</em><br>
+                            <strong>Action:</strong> Escalating to emergency queue. Blood pressure records requested from wearable device.
+                        </div>
+                    </div>
+                    <div class="ai-input-group">
+                        <input type="text" placeholder="Override AI diagnosis or request more patient data...">
+                        <button class="btn-send">Update EMR</button>
+                    </div>
+                </div>
+
+                <!-- Robot Dispatch Status -->
+                <div class="module-card">
+                    <div class="module-header">
+                        <div class="module-title">🤖 Medication Logistics</div>
+                    </div>
+                    <ul class="robot-list">
+                        <li class="robot-item">
+                            <div>
+                                <span class="status-dot status-active"></span> <strong>MediBot-01</strong>
+                            </div>
+                            <span style="color: var(--text-muted); font-size: 0.9rem;">En Route: Room 302</span>
+                        </li>
+                        <li class="robot-item">
+                            <div>
+                                <span class="status-dot status-active"></span> <strong>MediBot-02</strong>
+                            </div>
+                            <span style="color: var(--text-muted); font-size: 0.9rem;">Delivering: Lab B</span>
+                        </li>
+                        <li class="robot-item">
+                            <div>
+                                <span class="status-dot status-charging"></span> <strong>MediBot-03</strong>
+                            </div>
+                            <span style="color: var(--text-muted); font-size: 0.9rem;">Docked / Charging (88%)</span>
+                        </li>
+                        <li class="robot-item">
+                            <div>
+                                <span class="status-dot status-charging"></span> <strong>MediBot-04</strong>
+                            </div>
+                            <span style="color: var(--text-muted); font-size: 0.9rem;">Loading Payload</span>
+                        </li>
+                    </ul>
+                    <button style="width: 100%; margin-top: 20px; padding: 12px; background: white; border: 1px solid var(--primary); color: var(--primary); border-radius: 8px; font-weight: bold; cursor: pointer;">
+                        Dispatch New Robot
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- === 6. SYSTEM INTERACTIVITY (JAVASCRIPT) === -->
+    <script>
+        // --- Feature 1: Make the AI Triage Chat Working ---
+        const sendBtn = document.querySelector('.btn-send');
+        const chatInput = document.querySelector('.ai-input-group input');
+        const chatBox = document.querySelector('.ai-chat-box');
+
+        sendBtn.addEventListener('click', () => {
+            const text = chatInput.value.trim();
+            if (!text) return; // Stop if the input is empty
+
+            // 1. Create and add the Doctor's message
+            const docMsg = document.createElement('div');
+            docMsg.className = 'patient-message';
+            docMsg.innerHTML = `<strong>Doctor Override:</strong> "${text}"`;
+            chatBox.appendChild(docMsg);
+            
+            // 2. Clear the input box
+            chatInput.value = '';
+            
+            // 3. Auto-scroll to the bottom of the chat
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // 4. Simulate the AI thinking and responding 1.5 seconds later
+            setTimeout(() => {
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'ai-message';
+                aiMsg.innerHTML = `<strong>AI System:</strong> Acknowledged. Updating Electronic Medical Record and recalculating triage risk score based on new data...`;
+                chatBox.appendChild(aiMsg);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 1500);
+        });
+
+        // Allow pressing "Enter" on the keyboard to send
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendBtn.click();
+        });
+
+
+        // --- Feature 2: Interactive Robot Dispatch Button ---
+        // Select the button inside the robot module
+        const dispatchBtn = document.querySelector('.module-card:nth-child(2) button');
+        
+        dispatchBtn.addEventListener('click', function() {
+            // Save the original look
+            const originalText = this.innerHTML;
+            
+            // Change to loading state
+            this.innerHTML = '⏳ System Dispatching...';
+            this.style.backgroundColor = '#f1f5f9';
+            this.style.cursor = 'wait';
+            
+            // Simulate the robot connecting after 2 seconds
+            setTimeout(() => {
+                this.innerHTML = '✅ MediBot-04 Deployed!';
+                this.style.backgroundColor = '#d1fae5'; // Light green
+                this.style.color = '#059669'; // Dark green
+                this.style.borderColor = '#059669';
+                this.style.cursor = 'pointer';
+                
+                // Reset the button after 3 more seconds
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                    this.style.backgroundColor = 'white';
+                    this.style.color = 'var(--primary)';
+                    this.style.borderColor = 'var(--primary)';
+                }, 3000);
+            }, 2000);
+        });
+
+
+        // --- Feature 3: Interactive Sidebar Navigation ---
+        const navLinks = document.querySelectorAll('.nav-menu a');
+        
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault(); // Stops the page from jumping to the top
+                
+                // Remove the 'active' blue highlight from all links
+                navLinks.forEach(l => l.classList.remove('active'));
+                
+                // Add the 'active' highlight only to the one you just clicked
+                this.classList.add('active');
+            });
+        });
+    </script>
+    
+</body>
+</html>

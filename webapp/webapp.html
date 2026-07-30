@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Symptom Checker</title>
+    <style>
+        /* Base Reset */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f0f4f8; color: #333; padding: 40px; display: flex; justify-content: center; }
+
+        /* Card Container */
+        .symptom-checker-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 700px;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.05);
+        }
+
+        .symptom-checker-card h2 {
+            color: #2c5282;
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+
+        .symptom-checker-card p.subtitle {
+            color: #718096;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Form Sections */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+
+        /* Text Area */
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 15px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            resize: vertical;
+            font-size: 1rem;
+            background-color: #f7fafc;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #3182ce;
+            background-color: #ffffff;
+        }
+
+        /* Voice Recorder UI */
+        .voice-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background-color: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e0;
+        }
+
+        .btn-record {
+            background-color: #e53e3e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+
+        .btn-record:hover {
+            background-color: #c53030;
+        }
+
+        .record-hint {
+            font-size: 0.85rem;
+            color: #718096;
+        }
+
+        /* Drag & Drop File Upload */
+        .file-drop-zone {
+            border: 2px dashed #cbd5e0;
+            border-radius: 8px;
+            padding: 40px 20px;
+            text-align: center;
+            background-color: #f7fafc;
+            position: relative;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .file-drop-zone:hover {
+            border-color: #3182ce;
+            background-color: #ebf8ff;
+        }
+
+        .file-drop-zone input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-drop-zone p {
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        .file-drop-zone span {
+            color: #3182ce;
+            text-decoration: underline;
+        }
+
+        /* Submit Button */
+        .btn-submit {
+            width: 100%;
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+
+        .btn-submit:hover {
+            background-color: #2b6cb0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="symptom-checker-card">
+        <h2>AI Symptom Checker</h2>
+        <p class="subtitle">Describe your symptoms in detail. You can type, record a voice message, or upload images/videos of visible symptoms (like rashes or swelling). Our AI will analyze your inputs securely.</p>
+
+        <form action="#" method="POST" enctype="multipart/form-data">
+            
+            <!-- Text Input -->
+            <div class="form-group">
+                <label for="symptoms-text">1. Describe your symptoms</label>
+                <textarea id="symptoms-text" placeholder="E.g., I have been experiencing a sharp pain in my lower back for the past 3 days, accompanied by a mild fever..."></textarea>
+            </div>
+
+            <!-- Voice Recording -->
+            <div class="form-group">
+                <label>2. Or describe them out loud</label>
+                <div class="voice-controls">
+                    <button type="button" class="btn-record">
+                        <span>🎙️</span> Start Recording
+                    </button>
+                    <span class="record-hint">Max duration: 3 minutes</span>
+                </div>
+            </div>
+
+            <!-- Media Upload -->
+            <div class="form-group">
+                <label>3. Upload Photos or Videos (Optional)</label>
+                <div class="file-drop-zone">
+                    <input type="file" id="media-upload" accept="image/*,video/*" multiple>
+                    <p>Drag and drop files here or <span>browse your device</span></p>
+                    <p class="record-hint" style="margin-top: 8px;">Supports JPG, PNG, MP4 (Max 20MB)</p>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn-submit">Analyze Symptoms</button>
+
+        </form>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Smart Hospital Management System</title>
+    <style>
+        /* === 1. GLOBAL VARIABLES & RESET === */
+        :root {
+            --sidebar-bg: #0f172a;
+            --sidebar-text: #94a3b8;
+            --sidebar-hover: #1e293b;
+            --sidebar-active: #38bdf8;
+            
+            --bg-main: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            
+            --primary: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            
+            --radius: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+        /* === 2. SIDEBAR NAVIGATION === */
+        .sidebar {
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+        }
+        .sidebar h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
+        .sidebar h1 span { color: var(--sidebar-active); }
+        .nav-menu { list-style: none; flex: 1; }
+        .nav-menu li { margin-bottom: 8px; }
+        .nav-menu a {
+            display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+            color: var(--sidebar-text); text-decoration: none; border-radius: 8px; font-weight: 500; transition: all 0.2s;
+        }
+        .nav-menu a:hover, .nav-menu a.active { background-color: var(--sidebar-hover); color: var(--sidebar-active); }
+
+        /* === 3. MAIN WORKSPACE & HEADER === */
+        .workspace { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .top-header {
+            background-color: var(--card-bg); padding: 20px 40px; display: flex;
+            justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10;
+        }
+        .search-bar { width: 400px; padding: 10px 16px; border: 1px solid #cbd5e0; border-radius: 20px; background-color: #f8fafc; }
+        .user-profile { display: flex; align-items: center; gap: 16px; font-weight: 600; }
+        .badge { background-color: #dbeafe; color: var(--primary); padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; }
+
+        /* === 4. DASHBOARD GRID LAYOUT === */
+        .dashboard-content { padding: 40px; }
+        .page-title { margin-bottom: 24px; font-size: 1.8rem; color: var(--text-main); }
+
+        /* KPI Stats */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 32px; }
+        .kpi-card { background-color: var(--card-bg); padding: 24px; border-radius: var(--radius); box-shadow: var(--shadow-sm); border-top: 4px solid var(--primary); }
+        .kpi-card:nth-child(2) { border-top-color: var(--warning); }
+        .kpi-card:nth-child(3) { border-top-color: var(--success); }
+        .kpi-card:nth-child(4) { border-top-color: #8b5cf6; }
+        .kpi-title { color: var(--text-muted); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; }
+        .kpi-value { font-size: 2rem; font-weight: 700; }
+        .kpi-subtext { font-size: 0.85rem; color: var(--success); margin-top: 8px; display: block; }
+
+        /* Module Cards */
+        .modules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .module-card { background-color: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow-md); padding: 24px; }
+        .module-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0; }
+        .module-title { font-size: 1.2rem; font-weight: 600; }
+
+        /* === 5. SPECIFIC MODULE STYLES === */
+        /* Text AI Chat */
+        .ai-chat-box { background-color: #f8fafc; border-radius: 8px; padding: 16px; height: 250px; margin-bottom: 16px; border: 1px solid #e2e8f0; overflow-y: auto; }
+        .ai-message { background-color: #dbeafe; padding: 12px; border-radius: 8px; margin-bottom: 12px; width: 85%; }
+        .patient-message { background-color: var(--card-bg); border: 1px solid #cbd5e0; padding: 12px; border-radius: 8px; margin-bottom: 12px; width: 85%; margin-left: 15%; }
+        .ai-input-group { display: flex; gap: 12px; }
+        .ai-input-group input { flex: 1; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; }
+        .btn-send { background-color: var(--primary); color: white; border: none; padding: 0 24px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        /* Video Recorder UI */
+        .video-container video { width: 100%; background: #0f172a; border-radius: 8px; margin-bottom: 15px; aspect-ratio: 16/9; }
+        .video-controls { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; transition: 0.3s; text-align: center; flex: 1; }
+        .btn-start { background-color: var(--primary); }
+        .btn-stop { background-color: var(--danger); display: none; }
+        .btn-upload { background-color: var(--success); display: none; width: 100%; margin-top: 10px; flex: 100%; }
+        #video-ai-result { margin-top: 15px; padding: 15px; background: #fef3c7; color: #92400e; border-radius: 8px; display: none; font-size: 0.95rem;}
+
+        /* Robot List */
+        .robot-list { list-style: none; margin-top: 20px;}
+        .robot-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #e2e8f0; }
+        .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+        .status-active { background-color: var(--success); }
+        .status-charging { background-color: var(--warning); }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <h1>🏥 NextGen <span>Health</span></h1>
+        <ul class="nav-menu">
+            <li><a href="#" class="active">📊 System Overview</a></li>
+            <li><a href="#">🧠 AI Symptom Checker</a></li>
+            <li><a href="#">📁 Electronic Records</a></li>
+            <li><a href="#">🤖 Robot Dispatch</a></li>
+            <li><a href="#">⚙️ Security Settings</a></li>
+        </ul>
+    </aside>
+
+    <!-- MAIN WORKSPACE -->
+    <div class="workspace">
+        <header class="top-header">
+            <input type="text" class="search-bar" placeholder="Search patient ID, medical records, or symptoms...">
+            <div class="user-profile">
+                <span class="badge">Intelligent Triage Portal</span>
+                <div class="avatar">System Admin</div>
+            </div>
+        </header>
+
+        <div class="dashboard-content">
+            <h2 class="page-title">Hospital Command Center</h2>
+
+            <!-- KPI STATS -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-title">Active Patients</div>
+                    <div class="kpi-value">1,248</div>
+                    <span class="kpi-subtext">↑ 12% from last month</span>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">AI Triage Alerts</div>
+                    <div class="kpi-value">14</div>
+                    <span class="kpi-subtext" style="color: var(--warning);">High risk cases pending</span>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Robot Fleet Status</div>
+                    <div class="kpi-value">22 / 25</div>
+                    <span class="kpi-subtext">Autonomous units online</span>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Telemedicine Today</div>
+                    <div class="kpi-value">45</div>
+                    <span class="kpi-subtext" style="color: var(--sidebar-active);">Scheduled calls</span>
+                </div>
+            </div>
+
+            <!-- MODULES GRID -->
+            <div class="modules-grid">
+                
+                <!-- MODULE 1: Video/Voice Symptom Recorder -->
+                <div class="module-card">
+                    <div class="module-header">
+                        <div class="module-title">📹 AI Video & Voice Diagnostics</div>
+                        <span class="badge">Patient Input Mode</span>
+                    </div>
+                    <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9rem;">Record visible symptoms or voice descriptions. The AI will analyze the media and update the EMR.</p>
+                    
+                    <div class="video-container">
+                        <video id="live-video" autoplay muted></video>
+                        <div class="video-controls">
+                            <button id="start-btn" class="btn btn-start">🎥 Start Recording</button>
+                            <button id="stop-btn" class="btn btn-stop">⏹️ Stop & Save</button>
+                            <button id="upload-btn" class="btn btn-upload">🚀 Send to AI Database</button>
+                        </div>
+                    </div>
+
+                    <div id="video-ai-result">
+                        <strong>AI Diagnosis Engine:</strong> <span id="diagnosis-text"></span>
+                    </div>
+                </div>
+
+                <!-- Column 2 Wrapper for stacking smaller modules -->
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    
+                    <!-- MODULE 2: Text Triage Chat -->
+                    <div class="module-card">
+                        <div class="module-header">
+                            <div class="module-title">🧠 Live Text Triage</div>
+                            <span class="badge">Processing Patient #8942</span>
+                        </div>
+                        <div class="ai-chat-box" id="chat-box">
+                            <div class="patient-message">
+                                <strong>Patient:</strong> "I have had a severe headache and blurred vision since yesterday."
+                            </div>
+                            <div class="ai-message">
+                                <strong>AI System:</strong> Symptoms indicate potential hypertension. <br><em>Risk Score: 8.5/10 (High).</em> Escalating to emergency queue.
+                            </div>
+                        </div>
+                        <div class="ai-input-group">
+                            <input type="text" id="chat-input" placeholder="Type symptom override...">
+                            <button class="btn-send" id="send-btn">Send</button>
+                        </div>
+                    </div>
+
+                    <!-- MODULE 3: Robot Dispatch -->
+                    <div class="module-card">
+                        <div class="module-header">
+                            <div class="module-title">🤖 Medication Logistics</div>
+                        </div>
+                        <ul class="robot-list">
+                            <li class="robot-item">
+                                <div><span class="status-dot status-active"></span> <strong>MediBot-01</strong></div>
+                                <span style="color: var(--text-muted); font-size: 0.9rem;">En Route: Room 302</span>
+                            </li>
+                            <li class="robot-item">
+                                <div><span class="status-dot status-charging"></span> <strong>MediBot-03</strong></div>
+                                <span style="color: var(--text-muted); font-size: 0.9rem;">Docked (88%)</span>
+                            </li>
+                        </ul>
+                        <button id="dispatch-btn" class="btn btn-start" style="width: 100%; margin-top: 15px; background: white; border: 1px solid var(--primary); color: var(--primary);">
+                            Dispatch New Robot
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    // --- 1. AI VIDEO & AUDIO RECORDER ---
+    let mediaRecorder;
+    let recordedChunks = [];
+    let videoBlob;
+
+    const liveVideo = document.getElementById('live-video');
+    const startBtn = document.getElementById('start-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    const uploadBtn = document.getElementById('upload-btn');
+    const videoAiResult = document.getElementById('video-ai-result');
+    const diagnosisText = document.getElementById('diagnosis-text');
+
+    async function setupCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            liveVideo.srcObject = stream;
+            mediaRecorder = new MediaRecorder(stream);
+            
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) recordedChunks.push(e.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
+                uploadBtn.style.display = 'block'; 
+            };
+        } catch (err) {
+            console.error("Camera access denied or unavailable.");
+        }
+    }
+    setupCamera();
+
+    startBtn.addEventListener('click', () => {
+        recordedChunks = [];
+        mediaRecorder.start();
+        startBtn.style.display = 'none';
+        stopBtn.style.display = 'block';
+    });
+
+    stopBtn.addEventListener('click', () => {
+        mediaRecorder.stop();
+        stopBtn.style.display = 'none';
+        startBtn.style.display = 'block';
+        startBtn.innerText = "🔄 Re-record";
+    });
+
+    // Send video to Backend Database
+    uploadBtn.addEventListener('click', async () => {
+        uploadBtn.innerText = "⏳ Saving to Database...";
+        uploadBtn.style.backgroundColor = "var(--warning)"; 
+
+        const formData = new FormData();
+        formData.append("patient_name", "Patient #8942");
+        formData.append("file", videoBlob, "symptom_video.webm");
+
+        try {
+            const response = await fetch("http://localhost:8000/api/analyze-symptoms", {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await response.json();
+            
+            videoAiResult.style.display = 'block';
+            diagnosisText.innerText = result.ai_analysis;
+            uploadBtn.innerText = "✅ Saved to EMR Database";
+            uploadBtn.style.backgroundColor = "var(--success)";
+        } catch (error) {
+            alert("Connection error: Make sure the Python backend is running!");
+            uploadBtn.innerText = "❌ Upload Failed";
+        }
+    });
+
+    // --- 2. LIVE TEXT TRIAGE CHAT ---
+    const sendBtn = document.getElementById('send-btn');
+    const chatInput = document.getElementById('chat-input');
+    const chatBox = document.getElementById('chat-box');
+
+    sendBtn.addEventListener('click', async () => {
+        const text = chatInput.value.trim();
+        if (!text) return; 
+
+        chatBox.innerHTML += `<div class="patient-message"><strong>Doctor:</strong> "${text}"</div>`;
+        chatInput.value = '';
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        try {
+            const response = await fetch('http://localhost:8000/api/triage-chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text, patient_id: "8942" })
+            });
+
+            const data = await response.json();
+            chatBox.innerHTML += `<div class="ai-message"><strong>AI System:</strong> ${data.reply}</div>`;
+        } catch (error) {
+            chatBox.innerHTML += `<div class="ai-message" style="background:#fee2e2;"><strong>Error:</strong> Backend server offline.</div>`;
+        }
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
+
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendBtn.click();
+    });
+
+    // --- 3. ROBOT DISPATCH ---
+    const dispatchBtn = document.getElementById('dispatch-btn');
+    dispatchBtn.addEventListener('click', async function() {
+        const originalText = this.innerHTML;
+        this.innerHTML = '⏳ Dispatching Fleet...';
+        this.disabled = true;
+        
+        try {
+            const response = await fetch('http://localhost:8000/api/dispatch-robot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ target_room: "Room 302" })
+            });
+
+            const data = await response.json();
+            this.innerHTML = `✅ ${data.assigned_robot} Deployed!`;
+            this.style.backgroundColor = 'var(--success)';
+            this.style.color = 'white';
+        } catch (error) {
+            this.innerHTML = '❌ Fleet Server Offline';
+            this.style.backgroundColor = 'var(--danger)';
+            this.style.color = 'white';
+        }
+
+        setTimeout(() => {
+            this.innerHTML = originalText;
+            this.style.backgroundColor = 'white';
+            this.style.color = 'var(' + 'PRIMARY' + ')';
+            this.disabled = false;
+        }, 3000);
+    });
+</script>
+
+</body>
+</html>

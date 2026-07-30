@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextGen Smart Hospital Management</title>
+    <style>
+        /* === 1. GLOBAL VARIABLES & RESET === */
+        :root {
+            --sidebar-bg: #0f172a;
+            --sidebar-text: #94a3b8;
+            --sidebar-hover: #1e293b;
+            --sidebar-active: #38bdf8;
+            --bg-main: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --primary: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+        /* === 2. AUTHENTICATION SCREENS (LOGIN & REGISTER) === */
+        .auth-screen { display: flex; width: 100vw; height: 100vh; justify-content: center; align-items: center; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); position: absolute; z-index: 100; overflow-y: auto; padding: 20px;}
+        .auth-screen.hidden { display: none; }
+        .auth-card { background: var(--card-bg); padding: 35px; border-radius: var(--radius); box-shadow: var(--shadow-md); width: 100%; max-width: 450px; }
+        .auth-card.large { max-width: 600px; }
+        .auth-card h2 { color: var(--primary); margin-bottom: 6px; font-size: 1.8rem; }
+        .auth-card p { color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem; }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group.full-width { grid-column: span 2; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.85rem; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 0.95rem; background-color: #fff; }
+        
+        .btn-auth { width: 100%; background-color: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 5px; }
+        .btn-auth:hover { background-color: #1d4ed8; }
+        .auth-switch { text-align: center; margin-top: 15px; font-size: 0.9rem; color: var(--text-muted); }
+        .auth-switch a { color: var(--primary); text-decoration: none; font-weight: 600; cursor: pointer; }
+
+        /* === 3. MAIN APP LAYOUT === */
+        #app-container { display: none; width: 100%; height: 100%; }
+        #app-container.active-app { display: flex; }
+
+        /* Sidebar */
+        .sidebar { width: 280px; background-color: var(--sidebar-bg); color: white; display: flex; flex-direction: column; padding: 24px; flex-shrink: 0; }
+        .sidebar h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
+        .sidebar h1 span { color: var(--sidebar-active); }
+        .nav-menu { list-style: none; flex: 1; overflow-y: auto; }
+        .nav-menu li { margin-bottom: 8px; }
+        .nav-menu a { display: flex; align-items: center; gap: 12px; padding: 12px 16px; color: var(--sidebar-text); text-decoration: none; border-radius: 8px; font-weight: 500; transition: all 0.2s; cursor: pointer; }
+        .nav-menu a:hover, .nav-menu a.active { background-color: var(--sidebar-hover); color: var(--sidebar-active); }
+
+        /* Workspace & Header */
+        .workspace { flex: 1; display: flex; flex-direction: column; overflow-y: auto; background-color: var(--bg-main); }
+        .top-header { background-color: var(--card-bg); padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10; }
+        .search-bar { width: 350px; padding: 10px 16px; border: 1px solid #cbd5e0; border-radius: 20px; background-color: #f8fafc; }
+        .user-profile { display: flex; align-items: center; gap: 16px; font-weight: 600; }
+        .badge { background-color: #dbeafe; color: var(--primary); padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+
+        /* === 4. DASHBOARD COMPONENTS === */
+        .dashboard-content { padding: 40px; max-width: 1400px; margin: 0 auto; width: 100%; }
+        .page-view { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .page-view.active-page { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .page-title { margin-bottom: 24px; font-size: 1.8rem; color: var(--text-main); font-weight: 700; }
+
+        /* Grids */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin-bottom: 32px; }
+        .kpi-card { background-color: var(--card-bg); padding: 24px; border-radius: var(--radius); box-shadow: var(--shadow-sm); border-top: 4px solid var(--primary); }
+        .kpi-title { color: var(--text-muted); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; }
+        .kpi-value { font-size: 2rem; font-weight: 700; }
+        
+        .modules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 24px; align-items: start; }
+        .module-card { background-color: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow-md); padding: 24px; margin-bottom: 24px; }
+        .module-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0; }
+        .module-title { font-size: 1.2rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+
+        /* Buttons & Tables */
+        .btn { padding: 12px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; transition: 0.3s; text-align: center; }
+        .btn-primary { background-color: var(--primary); }
+        .btn-success { background-color: var(--success); }
+        .btn-danger { background-color: var(--danger); }
+        .btn-outline { background-color: transparent; color: var(--primary); border: 1px solid var(--primary); }
+        .btn:disabled { opacity: 0.7; cursor: not-allowed; }
+        
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 0.95rem; }
+        .data-table th { background-color: #f8fafc; color: var(--text-muted); font-weight: 600; }
+
+        /* Specific Modules */
+        .message-item { padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 15px; background: #f8fafc; }
+        .message-item.urgent { border-left: 4px solid var(--danger); }
+        .message-item.update { border-left: 4px solid var(--primary); }
+        
+        .ai-chat-box { background-color: #f8fafc; border-radius: 8px; padding: 16px; height: 250px; margin-bottom: 16px; border: 1px solid #e2e8f0; overflow-y: auto; }
+        .ai-message { background-color: #dbeafe; padding: 12px; border-radius: 8px; margin-bottom: 12px; width: 85%; font-size: 0.95rem; }
+        .patient-message { background-color: var(--card-bg); border: 1px solid #cbd5e0; padding: 12px; border-radius: 8px; margin-bottom: 12px; width: 85%; margin-left: 15%; font-size: 0.95rem; }
+        .ai-input-group { display: flex; gap: 10px; }
+        .ai-input-group input { flex: 1; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; }
+        
+        video { width: 100%; background: #0f172a; border-radius: 8px; margin-bottom: 15px; aspect-ratio: 16/9; object-fit: cover; }
+        .robot-list { list-style: none; }
+        .robot-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #e2e8f0; }
+        .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+        
+        /* Deep EMR Details */
+        .emr-section { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+        .emr-section h4 { color: var(--text-main); margin-bottom: 10px; font-size: 1rem; }
+        .emr-detail { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; }
+        .emr-detail span.label { color: var(--text-muted); font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <!-- ========================================== -->
+    <!-- 1. AUTHENTICATION & REGISTRATION SCREENS   -->
+    <!-- ========================================== -->
+    
+    <!-- Login Screen -->
+    <div id="page-login" class="auth-screen">
+        <div class="auth-card">
+            <h2>NextGen Health</h2>
+            <p>Unified Hospital Access Portal</p>
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Select Your Portal Role</label>
+                    <select id="login-role" required>
+                        <option value="patient">Patient / Family Portal</option>
+                        <option value="doctor">Doctor / Medical Staff Terminal</option>
+                        <option value="admin">Hospital Administrator</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Email / User ID</label>
+                    <input type="text" id="login-id" placeholder="Enter ID..." required value="user@nextgen.rw">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" placeholder="••••••••" required value="password123">
+                </div>
+                <button type="submit" class="btn-auth">Secure Login</button>
+            </form>
+            <div class="auth-switch">
+                New Patient? <a onclick="switchAuth('register')">Register Here</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration Screen -->
+    <div id="page-register" class="auth-screen hidden">
+        <div class="auth-card large">
+            <h2>Patient Registration</h2>
+            <p>Create a secure profile with localized tracking credentials</p>
+            <form onsubmit="handleRegister(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Full Legal Name</label>
+                        <input type="text" placeholder="e.g., John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label>National ID Number / Passport</label>
+                        <input type="text" placeholder="1 1998 8 0000000 1 23" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" placeholder="+250 780 000 000" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" placeholder="john@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Country of Residence</label>
+                        <select required>
+                            <option value="Rwanda">Rwanda</option>
+                            <option value="Kenya">Kenya</option>
+                            <option value="Uganda">Uganda</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>District</label>
+                        <input type="text" placeholder="e.g., Gasabo" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-auth" style="margin-top: 15px;">Complete Registration</button>
+            </form>
+            <div class="auth-switch">
+                Already registered? <a onclick="switchAuth('login')">Return to Login</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 2. MAIN APPLICATION (SPA INTERFACE)        -->
+    <!-- ========================================== -->
+    <div id="app-container">
+        
+        <!-- Dynamic Sidebar -->
+        <aside class="sidebar">
+            <h1>🏥 NextGen <span>Health</span></h1>
+            <ul class="nav-menu" id="dynamic-nav">
+                <!-- data-allowed dictates visibility -->
+                <li data-allowed="doctor,admin"><a data-target="page-overview">📊 System Overview</a></li>
+                <li data-allowed="patient,doctor"><a data-target="page-messages">💬 Care & Messages</a></li>
+                <li data-allowed="patient,doctor"><a data-target="page-symptom-checker">🧠 AI Symptom Checker</a></li>
+                <li data-allowed="doctor,admin"><a data-target="page-emr">📁 360° Patient EMR</a></li>
+                <li data-allowed="doctor,admin"><a data-target="page-inventory">💉 Tools & Inventory</a></li>
+                <li data-allowed="patient,admin"><a data-target="page-insurance">💳 Insurance & Billing</a></li>
+                <li data-allowed="doctor,admin"><a data-target="page-appointments">📅 Schedule Appointments</a></li>
+                <li data-allowed="patient,doctor,admin"><a data-target="page-security">⚙️ Security Settings</a></li>
+                <li data-allowed="patient,doctor,admin" style="margin-top: auto;"><a onclick="handleLogout()" style="color: var(--danger);">🚪 Log Out</a></li>
+            </ul>
+        </aside>
+
+        <div class="workspace">
+            <header class="top-header">
+                <input type="text" class="search-bar" placeholder="Search patients, equipment, or meds...">
+                <div class="user-profile">
+                    <span class="badge" id="header-role-badge">Loading...</span>
+                    <div class="avatar">👤</div>
+                </div>
+            </header>
+
+            <div class="dashboard-content">
+
+                <!-- --------------------------------------------------- -->
+                <!-- PAGE: SYSTEM OVERVIEW (Doctor / Admin)              -->
+                <!-- --------------------------------------------------- -->
+                <div id="page-overview" class="page-view">
+                    <h2 class="page-title">Command Center Overview</h2>
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-title">Active Patients</div>
+                            <div class="kpi-value">1,248</div>
+                            <span style="color: var(--success); font-size: 0.85rem;">↑ 12% from last month</span>
+                        </div>
+                        <div class="kpi-card" style="border-top-color: var(--warning);">
+                            <div class="kpi-title">AI Triage Alerts</div>
+                            <div class="kpi-value">14</div>
+                            <span style="color: var(--warning); font-size: 0.85rem;">High risk cases pending</span>
+                        </div>
+                        <div class="kpi-card" style="border-top-color: var(--success);">
+                            <div class="kpi-title">Robot Fleet</div>
+                            <div class="kpi-value">22 / 25</div>
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">Units online & active</span>
+                        </div>
+                        <div class="kpi-card" style="border-top-color: #8b5cf6;">
+                            <div class="kpi-title">ER Bed Availability</div>
+                            <div class="kpi-value">18 Beds</div>
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">Real-time hospital status</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- --------------------------------------------------- -->
+                <!-- PAGE: 360° PATIENT EMR (Doctor / Admin)             -->
+                <!-- --------------------------------------------------- -->
+                <div id="page-emr" class="page-view">
+                    <h2 class="page-title">360° Comprehensive Electronic Medical Records</h2>
+                    
+                    <div class="module-card">
+                        <div class="module-header">
+                            <div class="module-title">Detailed Patient File: #PAT-8942 (John Doe)</div>
+                            <span class="badge" style="background:#fee2e2; color:var(--danger);">Critical Review</span>
+                        </div>
+                        
+                        <div class="form-grid" style="align-items: start;">
+                            <!-- Column 1: Vitals & Meds -->
+                            <div>
+                                <div class="emr-section">
+                                    <h4>Demographics</h4>
+                                    <div class="emr-detail"><span class="label">Age/Sex:</span> <span>45 / Male</span></div>
+                                    <div class="emr-detail"><span class="label">Blood Type:</span> <span>O Positive</span></div>
+                                    <div class="emr-detail"><span class="label">Allergies:</span> <span style="color:var(--danger); font-weight:bold;">Penicillin, Peanuts</span></div>
+                                </div>
+                                <div class="emr-section">
+                                    <h4>Current Vitals (Wearable Sync)</h4>
+                                    <div class="emr-detail"><span class="label">Heart Rate:</span> <span>88 BPM</span></div>
+                                    <div class="emr-detail"><span class="label">Blood Pressure:</span> <span style="color:var(--danger); font-weight:bold;">150/95 mmHg</span></div>
+                                    <div class="emr-detail"><span class="label">Oxygen (SpO2):</span> <span>98%</span></div>
+                                </div>
+                                <div class="emr-section">
+                                    <h4>Active Prescriptions</h4>
+                                    <ul style="margin-left: 20px; font-size: 0.9rem; color: var(--text-muted);">
+                                        <li>Lisinopril 10mg (1x Daily)</li>
+                                        <li>Amlodipine 5mg (1x Daily)</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- Column 2: AI Diagnostic Logs & Tools -->
+                            <div>
+                                <div class="emr-section" style="border-left: 4px solid var(--primary);">
+                                    <h4>AI Triage & Video Report</h4>
+                                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px;"><strong>Uploaded:</strong> Oct 12, 09:30 AM</p>
+                                    <p style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 8px;"><strong>Transcript:</strong> "I have had a severe headache and blurred vision since yesterday morning. Also feeling very dizzy."</p>
+                                    <p style="font-size: 0.9rem; color: var(--text-main);"><strong>AI Assessment:</strong> Symptoms combined with wearable BP data indicate acute hypertension. Risk Score: 8.5/10.</p>
+                                </div>
+                                <div class="emr-section">
+                                    <h4>Clinical Treatment Notes</h4>
+                                    <textarea style="width: 100%; height: 80px; padding: 10px; border: 1px solid #cbd5e0; border-radius: 8px; margin-bottom: 10px;">Patient advised to rest. Adjusted Lisinopril dosage. Lab panel ordered.</textarea>
+                                    <button class="btn btn-primary" style="width: 100%;">Save Doctor Notes to EMR</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- --------------------------------------------------- -->
+                <!-- PAGE: HOSPITAL TOOLS & INVENTORY (Doctor / Admin)   -->
+                <!-- --------------------------------------------------- -->
+                <div id="page-inventory" class="page-view">
+                    <h2 class="page-title">Hospital Tools, Equipment & Pharmacy Logistics</h2>
+                    
+                    <div class="modules-grid">
+                        <!-- Medicine Inventory -->
+                        <div class="module-card">
+                            <div class="module-header"><div class="module-title">💊 Pharmacy Stock Levels</div></div>
+                            <table class="data-table">
+                                <thead><tr><th>Medication</th><th>Stock</th><th>Status</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Amoxicillin 500mg</td><td>4,500 units</td><td><span class="badge" style="background:#d1fae5; color:var(--success);">Sufficient</span></td></tr>
+                                    <tr><td>Lisinopril 10mg</td><td>85 units</td><td><span class="badge" style="background:#fee2e2; color:var(--danger);">Low Stock</span></td></tr>
+                                    <tr><td>Paracetamol IV</td><td>1,200 units</td><td><span class="badge" style="background:#d1fae5; color:var(--success);">Sufficient</span></td></tr>
+                                </tbody>
+                            </table>
+                            <button class="btn btn-outline" style="width: 100%; margin-top: 15px;">Order Restock</button>
+                        </div>
+
+                        <!-- Diagnostic & Surgical Tools -->
+                        <div class="module-card">
+                            <div class="module-header"><div class="module-title">🔬 Diagnostic & Surgical Equipment</div></div>
+                            <table class="data-table">
+                                <thead><tr><th>Equipment</th><th>Location</th><th>Status</th></tr></thead>
+                                <tbody>
+                                    <tr><td>MRI Scanner 1</td><td>Radiology Wing A</td><td><span class="badge" style="background:#d1fae5; color:var(--success);">Operational</span></td></tr>
+                                    <tr><td>CT Scanner</td><td>Radiology Wing B</td><td><span class="badge" style="background:#fef3c7; color:var(--warning);">Maintenance Req.</span></td></tr>
+                                    <tr><td>Defibrillator (Portable)</td><td>ER Bay 3</td><td><span class="badge" style="background:#d1fae5; color:var(--success);">Available</span></td></tr>
+                                    <tr><td>Surgical Kit (Ortho)</td><td>OR 2</td><td><span class="badge" style="background:#fee2e2; color:var(--danger);">In Use</span></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Robot Fleet -->
+                        <div class="module-card">
+                            <div class="module-header"><div class="module-title">🤖 Autonomous Robot Fleet</div></div>
+                            <ul class="robot-list">
+                                <li class="robot-item">
+                                    <div><span class="status-dot" style="background:var(--success);"></span> <strong>MediBot-01 (Medication Delivery)</strong></div>
+                                    <span style="color: var(--text-muted); font-size: 0.9rem;">En Route: Room 302</span>
+                                </li>
+                                <li class="robot-item">
+                                    <div><span class="status-dot" style="background:var(--success);"></span> <strong>MediBot-02 (Bio-hazard Transport)</strong></div>
+                                    <span style="color: var(--text-muted); font-size: 0.9rem;">Delivering: Lab B</span>
+                                </li>
+                                <li class="robot-item">
+                                    <div><span class="status-dot" style="background:var(--warning);"></span> <strong>MediBot-03 (UV Sterilization)</strong></div>
+                                    <span style="color: var(--text-muted); font-size: 0.9rem;">Docked / Charging (88%)</span>
+                                </li>
+                            </ul>
+                            <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="alert('Command sent. MediBot-03 deployed to sterilize OR 1.')">Dispatch Fleet Unit</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- --------------------------------------------------- -->
+                <!-- PAGE: MESSAGES & EMPATHY BRIDGE (Patient)           -->
+                <!-- --------------------------------------------------- -->
+                <div id="page-messages" class="page-view">
+                    <h2 class="page-title">Direct Care & Empathy Bridge</h2>
+                    <div class="modules-grid">
+                        <div class="module-card">
+                            <div class="module-header"><div class="module-title">📥 Provider Inbox</div><span class="badge">2 Unread</span></div>
+                            <div class="message-item urgent">
+                                <strong>System Alert: Appointment Tomorrow</strong><br>
+                                <span style="font-size: 0.9rem; color: var(--text-muted);">Please fast 12 hours prior to your lab panel at 8:00 AM.</span>
+                            </div>
+                        </div>
+                        <div class="module-card">
+                            <div class="module-header"><div class="module-title">❤️ Family Care Bridge</div><span class="badge" style="background:#d1fae5; color:var(--success);">Connected</span></div>
+                            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Send a secure voice note to your authorized family members on WhatsApp.</p>
+                            <div style="text-align: center; padding: 20px; background: #f8fafc; border-radius: 8px; border: 2px dashed #cbd5e0;">
+                                <div style="font-size: 2.5rem; margin-bottom: 10px;">🎙️</div>
+                                <button class="btn btn-primary" onclick="alert('Voice message recorded, AI-optimized, and dispatched to Family WhatsApp group!')">Record Comfort Note</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- --------------------------------------------------- -->
+                <!-- PAGE: AI SYMPTOM CHECKER (Patient / Doctor)         -->
+                <!-- --------------------------------------------------- -->
+                <div id="page-symptom-checker" class="page-view">
+                    <h2 class="page-title">AI Symptom Checker & Diagnostics</h2>
+                    <div style="background: #fee2e2; border-left: 4px solid var(--danger); padding: 15px; border-radius: 8px; margin-bottom: 24px;">
+                        <strong style="color: var(--danger);">⚠️ Emergency Medical Disclaimer:</strong> This AI tool is for preliminary assessment only. If experiencing severe chest pain, shortness of breath, or stroke symptoms, <strong>call emergency services immediately.</strong>
+                    </div>
+                    <div class="modules-grid">
+                        <div class="module-card">
+                            <div class="module-header"><div class="module-title">📹 Video Diagnostic Recorder</div></div>
+                            <video id="live-video" autoplay muted></video>
+                            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                <button id="btn-start-record" class="btn btn-primary" style="flex:1;" onclick="startRec()">Start Record</button>
+                                <button id="btn-stop-record" class="btn btn-danger" style="flex:1; display:none;" onclick="stopRec()">Stop</button>
+                            </div>
+                            <button id="btn-upload-record" class="btn btn-success" style="width:100%; display:none;" onclick="uploadRec()">Analyze & Upload to EMR</button>
+                            <div id="ai-video-feedback" style="margin-top: 15px; padding: 10px; background: #d1fae5; color: #065f46; border-radius: 8px; display: none; font-size: 0.9rem;">
+                                AI processing complete. Media securely attached to your EMR file.
+                            </div>
+                        </div>
+                        <div class="module-card">
+                            <div class="module-header"><div class="module-title">🧠 Live Text Triage</div></div>
+                            <div class="ai-chat-box" id="triage-chat">
+                                <div class="ai-message"><strong>AI:</strong> Hello. Please describe your symptoms in detail.</div>
+                            </div>
+                            <div class="ai-input-group">
+                                <input type="text" id="triage-input" placeholder="e.g., I have a fever and headache...">
+                                <button class="btn btn-primary" onclick="sendTriageMsg()">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- --------------------------------------------------- -->
+                <!-- PAGE: INSURANCE & BILLING (Patient / Admin)         -->
+                <!-- --------------------------------------------------- -->
+                <div id="page-insurance" class="page-view">
+                    <h2 class="page-title">Insurance, Billing & Local Payments</h2>
+                    <div class="modules-grid">
+                        <div class="module-card">
+                            <div class="module-header"><div class="module-title">💳 Active Coverage</div></div>
+                            <p style="margin-bottom: 8px;"><strong>Provider:</strong> RAMA / RSSB Medical Scheme</p>
+                            <p style="margin-bottom: 8px;"><strong>Member ID:</strong> RSSB-119988-X</p>
+                            <p style="margin-bottom: 15px;"><strong>Status:</strong> <span style="color: var(--success); font-weight:bold;">Active & Verified</span></p>
+                            <button class="btn btn-outline" style="width: 100%;">Update Insurance Card</button>
+                        </div>
+                        <div class="module-card">
+                            <div class="module-header"><div class="module-title">💲 Account Balance</div><span class="badge" style="background:#d1fae5; color:var(--success);">🔒 Secure</span></div>
+                            <div style="text-align: center; margin-bottom: 15px;">
+                                <span style="font-size: 2.5rem; font-weight: 700; color: var(--text-main);">65,000 RWF</span><br>
+                                <span style="color: var(--text-muted); font-size: 0.9rem;">Outstanding Co-Pay Balance</span>
+                            </div>
+                            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.85rem;">Select Payment Method:</label>
+                                <select id="payment-method" style="width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 8px; margin-bottom: 10px;" onchange="togglePaymentInput()">
+                                    <option value="momo">🟡 MTN Mobile Money (MoMo)</option>
+                                    <option value="airtel">🔴 Airtel Money</option>
+                                    <option value="card">💳 Visa / Mastercard</option>
+                                </select>
+                                <div id="phone-input-group"><input type="tel" id="payment-phone" placeholder="MTN Number (e.g., 078...)" style="width: 100%; padding: 10px; border: 1px solid #cbd5e0; border-radius: 8px;"></div>
+                                <div id="card-input-group" style="display: none; font-size: 0.85rem; color: var(--text-muted);">Redirecting to secure 3D Secure checkout gateway...</div>
+                            </div>
+                            <button id="btn-pay" class="btn btn-success" style="width: 100%;" onclick="processPayment()">Pay 65,000 RWF Now</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- --------------------------------------------------- -->
+                <!-- PAGE: APPOINTMENTS (Doctor / Admin)                 -->
+                <!-- --------------------------------------------------- -->
+                <div id="page-appointments" class="page-view">
+                    <h2 class="page-title">Smart Appointment Hub</h2>
+                    <div class="module-card" style="max-width: 600px;">
+                        <div class="module-header">
+                            <div class="module-title">Automated SMS / WhatsApp Scheduler</div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                            <input type="text" placeholder="Patient Name" style="padding: 10px; border: 1px solid #cbd5e0; border-radius: 8px;">
+                            <input type="text" placeholder="Condition / Disease Notes" style="padding: 10px; border: 1px solid #cbd5e0; border-radius: 8px;">
+                            <input type="tel" placeholder="Phone Number (+250...)" style="padding: 10px; border: 1px solid #cbd5e0; border-radius: 8px;">
+                            <input type="datetime-local" style="padding: 10px; border: 1px solid #cbd5e0; border-radius: 8px;">
+                        </div>
+                        <button class="btn btn-primary" style="width: 100%;" onclick="alert('Appointment saved. Automated WhatsApp reminder dispatched to patient.')">Schedule & Notify Patient</button>
+                    </div>
+                </div>
+
+                <!-- --------------------------------------------------- -->
+                <!-- PAGE: SECURITY SETTINGS (All Roles)                 -->
+                <!-- --------------------------------------------------- -->
+                <div id="page-security" class="page-view">
+                    <h2 class="page-title">System Security & Access Control</h2>
+                    <div class="modules-grid">
+                        <div class="module-card">
+                            <div class="module-header"><div class="module-title">Authentication Settings</div></div>
+                            <p style="color: var(--text-muted); margin-bottom: 12px;">Two-Factor Authentication (2FA): <strong style="color:var(--success);">Enforced</strong></p>
+                            <button class="btn btn-primary" style="width: 100%; margin-bottom: 10px;">Update Password</button>
+                            <button class="btn btn-outline" style="width: 100%;">Download Data (HIPAA/GDPR)</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 5. SYSTEM JAVASCRIPT LOGIC                 -->
+    <!-- ========================================== -->
+    <script>
+        // --- Core State ---
+        let currentRole = '';
+
+        // --- Auth Switching ---
+        function switchAuth(target) {
+            document.getElementById('page-login').classList.add('hidden');
+            document.getElementById('page-register').classList.add('hidden');
+            document.getElementById('page-' + target).classList.remove('hidden');
+        }
+
+        // --- Registration Logic ---
+        function handleRegister(e) {
+            e.preventDefault();
+            alert("Registration successful! National ID and Location data verified.");
+            switchAuth('login');
+        }
+
+        // --- Login & RBAC Logic ---
+        function handleLogin(e) {
+            e.preventDefault();
+            currentRole = document.getElementById('login-role').value;
+            
+            // Set Header Badge
+            const badge = document.getElementById('header-role-badge');
+            if (currentRole === 'patient') badge.innerText = "Patient / Family Portal";
+            if (currentRole === 'doctor') badge.innerText = "Physician Terminal";
+            if (currentRole === 'admin') badge.innerText = "System Administrator";
+
+            // Filter Navigation Based on Role
+            const navItems = document.querySelectorAll('#dynamic-nav li');
+            let firstAllowedTab = null;
+
+            navItems.forEach(li => {
+                const allowedRoles = li.getAttribute('data-allowed').split(',');
+                const link = li.querySelector('a');
+                
+                if (allowedRoles.includes(currentRole)) {
+                    li.style.display = 'block';
+                    if (!firstAllowedTab && link.getAttribute('data-target')) {
+                        firstAllowedTab = link.getAttribute('data-target');
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                } else {
+                    li.style.display = 'none';
+                }
+            });
+
+            // Activate correct initial page view
+            const pages = document.querySelectorAll('.page-view');
+            pages.forEach(p => {
+                if (p.id === firstAllowedTab) p.classList.add('active-page');
+                else p.classList.remove('active-page');
+            });
+
+            // Hide auth, show app
+            document.getElementById('page-login').classList.add('hidden');
+            document.getElementById('app-container').classList.add('active-app');
+        }
+
+        function handleLogout() {
+            document.getElementById('app-container').classList.remove('active-app');
+            document.getElementById('page-login').classList.remove('hidden');
+            currentRole = '';
+        }
+
+        // --- SPA Navigation Routing ---
+        const navLinks = document.querySelectorAll('.nav-menu a[data-target]');
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                const targetId = link.getAttribute('data-target');
+                navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+
+                document.querySelectorAll('.page-view').forEach(page => {
+                    if (page.id === targetId) page.classList.add('active-page');
+                    else page.classList.remove('active-page');
+                });
+            });
+        });
+
+        // --- Payment Logic (MoMo / Airtel) ---
+        function togglePaymentInput() {
+            const method = document.getElementById('payment-method').value;
+            const phoneGroup = document.getElementById('phone-input-group');
+            const cardGroup = document.getElementById('card-input-group');
+            const phoneInput = document.getElementById('payment-phone');
+
+            if (method === 'momo' || method === 'airtel') {
+                phoneGroup.style.display = 'block';
+                cardGroup.style.display = 'none';
+                phoneInput.placeholder = method === 'momo' ? "MTN Number (078/079...)" : "Airtel Number (073...)";
+            } else {
+                phoneGroup.style.display = 'none';
+                cardGroup.style.display = 'block';
+            }
+        }
+
+        function processPayment() {
+            const method = document.getElementById('payment-method').value;
+            const phone = document.getElementById('payment-phone').value;
+            const btn = document.getElementById('btn-pay');
+            
+            if ((method === 'momo' || method === 'airtel') && !phone) {
+                alert("Please enter your mobile money number.");
+                return;
+            }
+
+            const originalText = btn.innerText;
+            btn.innerText = "⏳ Processing securely...";
+            btn.classList.replace('btn-success', 'btn-primary');
+
+            setTimeout(() => {
+                if (method === 'momo' || method === 'airtel') {
+                    alert(`USSD prompt sent to ${phone}. Please check your phone to enter your PIN and authorize 65,000 RWF.`);
+                } else {
+                    alert("Redirecting to secure Visa/Mastercard gateway...");
+                }
+                btn.innerText = "✅ Payment Initiated";
+                btn.classList.replace('btn-primary', 'btn-success');
+                setTimeout(() => btn.innerText = originalText, 3000);
+            }, 1500);
+        }
+
+        // --- Camera & AI Recording Logic ---
+        let mediaStream = null;
+        async function startRec() {
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                document.getElementById('live-video').srcObject = mediaStream;
+                document.getElementById('btn-start-record').style.display = 'none';
+                document.getElementById('btn-stop-record').style.display = 'block';
+            } catch(e) { alert("Camera access denied."); }
+        }
+
+        function stopRec() {
+            if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
+            document.getElementById('btn-stop-record').style.display = 'none';
+            document.getElementById('btn-start-record').style.display = 'block';
+            document.getElementById('btn-start-record').innerText = "🔄 Re-record";
+            document.getElementById('btn-upload-record').style.display = 'block';
+        }
+
+        function uploadRec() {
+            const btn = document.getElementById('btn-upload-record');
+            btn.innerText = "⏳ AI Analyzing...";
+            setTimeout(() => {
+                btn.style.display = 'none';
+                document.getElementById('ai-video-feedback').style.display = 'block';
+            }, 2000);
+        }
+
+        // --- Triage Chat Logic ---
+        function sendTriageMsg() {
+            const input = document.getElementById('triage-input');
+            const chatBox = document.getElementById('triage-chat');
+            const text = input.value.trim();
+            if(!text) return;
+
+            chatBox.innerHTML += `<div class="patient-message"><strong>User:</strong> ${text}</div>`;
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            setTimeout(() => {
+                chatBox.innerHTML += `<div class="ai-message"><strong>AI:</strong> Noted. I have appended this symptom profile to your EMR for doctor review. Risk factors updated.</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Smart Hospital Management System</title>
+    <style>
+        :root {
+            --sidebar-bg: #0f172a;
+            --sidebar-text: #94a3b8;
+            --sidebar-hover: #1e293b;
+            --sidebar-active: #38bdf8;
+            
+            --bg-main: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            
+            --primary: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+        /* Full App Wrapper (Hidden until login) */
+        #app-container { display: none; width: 100%; height: 100%; }
+        #app-container.active-app { display: flex; }
+
+        /* Login Page View */
+        #page-login { display: flex; width: 100vw; height: 100vh; justify-content: center; align-items: center; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+        #page-login.hidden { display: none; }
+        .login-card { background: var(--card-bg); padding: 40px; border-radius: var(--radius); box-shadow: var(--shadow-md); width: 100%; max-width: 420px; }
+        .login-card h2 { color: var(--primary); margin-bottom: 8px; font-size: 1.8rem; }
+        .login-card p { color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 1rem; background-color: #fff; }
+        .btn-login { width: 100%; background-color: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-login:hover { background-color: #1d4ed8; }
+
+        /* Sidebar */
+        .sidebar { width: 280px; background-color: var(--sidebar-bg); color: white; display: flex; flex-direction: column; padding: 24px; }
+        .sidebar h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
+        .sidebar h1 span { color: var(--sidebar-active); }
+        .nav-menu { list-style: none; flex: 1; }
+        .nav-menu li { margin-bottom: 8px; }
+        .nav-menu a {
+            display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+            color: var(--sidebar-text); text-decoration: none; border-radius: 8px; font-weight: 500; transition: all 0.2s; cursor: pointer;
+        }
+        .nav-menu a:hover, .nav-menu a.active { background-color: var(--sidebar-hover); color: var(--sidebar-active); }
+
+        /* Workspace */
+        .workspace { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .top-header {
+            background-color: var(--card-bg); padding: 20px 40px; display: flex;
+            justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 10;
+        }
+        .search-bar { width: 400px; padding: 10px 16px; border: 1px solid #cbd5e0; border-radius: 20px; background-color: #f8fafc; }
+        .user-profile { display: flex; align-items: center; gap: 16px; font-weight: 600; }
+        .badge { background-color: #dbeafe; color: var(--primary); padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; }
+
+        /* View Pages Container */
+        .dashboard-content { padding: 40px; }
+        .page-view { display: none; }
+        .page-view.active-page { display: block; }
+        .page-title { margin-bottom: 24px; font-size: 1.8rem; color: var(--text-main); }
+
+        /* KPI Stats */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 32px; }
+        .kpi-card { background-color: var(--card-bg); padding: 24px; border-radius: var(--radius); box-shadow: var(--shadow-sm); border-top: 4px solid var(--primary); }
+        .kpi-card:nth-child(2) { border-top-color: var(--warning); }
+        .kpi-card:nth-child(3) { border-top-color: var(--success); }
+        .kpi-card:nth-child(4) { border-top-color: #8b5cf6; }
+        .kpi-title { color: var(--text-muted); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; }
+        .kpi-value { font-size: 2rem; font-weight: 700; }
+        .kpi-subtext { font-size: 0.85rem; color: var(--success); margin-top: 8px; display: block; }
+
+        /* Cards & Modules */
+        .modules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .module-card { background-color: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow-md); padding: 24px; margin-bottom: 24px; }
+        .module-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0; }
+        .module-title { font-size: 1.2rem; font-weight: 600; }
+
+        /* Chat & Video elements */
+        .ai-chat-box { background-color: #f8fafc; border-radius: 8px; padding: 16px; height: 300px; margin-bottom: 16px; border: 1px solid #e2e8f0; overflow-y: auto; }
+        .ai-message { background-color: #dbeafe; padding: 12px; border-radius: 8px; margin-bottom: 12px; width: 85%; }
+        .patient-message { background-color: var(--card-bg); border: 1px solid #cbd5e0; padding: 12px; border-radius: 8px; margin-bottom: 12px; width: 85%; margin-left: 15%; }
+        .ai-input-group { display: flex; gap: 12px; }
+        .ai-input-group input { flex: 1; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; }
+        .btn-send { background-color: var(--primary); color: white; border: none; padding: 0 24px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        .video-container video { width: 100%; background: #0f172a; border-radius: 8px; margin-bottom: 15px; aspect-ratio: 16/9; }
+        .video-controls { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; transition: 0.3s; text-align: center; }
+        .btn-start { background-color: var(--primary); }
+        .btn-stop { background-color: var(--danger); display: none; }
+        .btn-upload { background-color: var(--success); display: none; width: 100%; margin-top: 10px; }
+
+        /* Tables for EMR & Insurance */
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .data-table th, .data-table td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 0.95rem; }
+        .data-table th { background-color: #f8fafc; color: var(--text-muted); }
+
+        /* Robot List */
+        .robot-list { list-style: none; }
+        .robot-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #e2e8f0; }
+        .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+        .status-active { background-color: var(--success); }
+        .status-charging { background-color: var(--warning); }
+    </style>
+</head>
+<body>
+
+    <!-- PATIENT LOGIN SCREEN -->
+    <div id="page-login">
+        <div class="login-card">
+            <h2>NextGen Health</h2>
+            <p>Secure Patient & Triage Login Portal</p>
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="login-email" placeholder="patient@example.com" required value="patient@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" placeholder="••••••••" required value="password123">
+                </div>
+                <button type="submit" class="btn-login">Secure Patient Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER (Loads after login) -->
+    <div id="app-container">
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="sidebar">
+            <h1>🏥 NextGen <span>Health</span></h1>
+            <ul class="nav-menu">
+                <li><a data-target="page-overview" class="active">📊 System Overview</a></li>
+                <li><a data-target="page-symptom-checker">🧠 AI Symptom Checker</a></li>
+                <li><a data-target="page-emr">📁 Electronic Records</a></li>
+                <li><a data-target="page-insurance">💳 Insurance & Billing</a></li>
+                <li><a data-target="page-robot">🤖 Robot Dispatch</a></li>
+                <li><a data-target="page-appointments">📅 Appointments & Reminders</a></li>
+                <li><a data-target="page-security">⚙️ Security Settings</a></li>
+                <li style="margin-top: 40px;"><a onclick="handleLogout()" style="color: var(--danger);">🚪 Log Out</a></li>
+            </ul>
+        </aside>
+
+        <!-- MAIN WORKSPACE -->
+        <div class="workspace">
+            <header class="top-header">
+                <input type="text" class="search-bar" placeholder="Search patient ID, medical records, or insurance claims...">
+                <div class="user-profile">
+                    <span class="badge">Patient Portal (John Doe)</span>
+                    <div class="avatar">👤</div>
+                </div>
+            </header>
+
+            <div class="dashboard-content">
+
+                <!-- PAGE 1: SYSTEM OVERVIEW -->
+                <div id="page-overview" class="page-view active-page">
+                    <h2 class="page-title">Hospital Command Center Overview</h2>
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-title">Active Patients</div>
+                            <div class="kpi-value">1,248</div>
+                            <span class="kpi-subtext">↑ 12% from last month</span>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-title">AI Triage Alerts</div>
+                            <div class="kpi-value">14</div>
+                            <span class="kpi-subtext" style="color: var(--warning);">High risk cases pending</span>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-title">Robot Fleet Status</div>
+                            <div class="kpi-value">22 / 25</div>
+                            <span class="kpi-subtext">Autonomous units online</span>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-title">ER Bed Availability</div>
+                            <div class="kpi-value">18 Beds</div>
+                            <span class="kpi-subtext" style="color: var(--sidebar-active);">Real-time hospital status</span>
+                        </div>
+                    </div>
+                    <div class="modules-grid">
+                        <div class="module-card">
+                            <div class="module-header"><div class="module-title">Hospital Information & Resources</div></div>
+                            <p style="color: var(--text-muted); margin-bottom: 8px;"><strong>Emergency Department:</strong> Open 24/7 (Wait time: ~14 mins)</p>
+                            <p style="color: var(--text-muted); margin-bottom: 8px;"><strong>Main Pharmacy:</strong> Ground Floor (Hours: 8:00 AM - 10:00 PM)</p>
+                            <p style="color: var(--text-muted);"><strong>Visiting Hours:</strong> 2:00 PM - 8:00 PM Daily</p>
+                        </div>
+                        <div class="module-card">
+                            <div class="module-header"><div class="module-title">Recent System Activity</div></div>
+                            <p style="color: var(--text-muted);">MediBot-01 successfully delivered medication to Room 302. Insurance claim #CLM-4921 verified automatically.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 2: AI SYMPTOM CHECKER -->
+                <div id="page-symptom-checker" class="page-view">
+                    <h2 class="page-title">AI Symptom Checker & Diagnostics</h2>
+                    <div class="modules-grid">
+                        <div class="module-card">
+                            <div class="module-header"><div class="module-title">📹 Video & Voice Diagnostic Recorder</div></div>
+                            <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.9rem;">Record symptoms directly to analyze conditions securely.</p>
+                            <div class="video-container">
+                                <video id="live-video" autoplay muted></video>
+                                <div class="video-controls">
+                                    <button id="start-btn" class="btn btn-start">🎥 Start Recording</button>
+                                    <button id="stop-btn" class="btn btn-stop">⏹️ Stop & Save</button>
+                                    <button id="upload-btn" class="btn btn-upload">🚀 Send to AI Database</button>
+                                </div>
+                            </div>
+                            <div id="video-ai-result" style="margin-top: 15px; padding: 15px; background: #fef3c7; color: #92400e; border-radius: 8px; display: none;">
+                                <strong>AI Analysis:</strong> <span id="diagnosis-text"></span>
+                            </div>
+                        </div>
+
+                        <div class="module-card">
+                            <div class="module-header"><div class="module-title">🧠 Live Interactive Text Triage</div></div>
+                            <div class="ai-chat-box" id="chat-box">
+                                <div class="patient-message"><strong>Patient:</strong> "I have had a severe headache and dizziness since yesterday."</div>
+                                <div class="ai-message"><strong>AI System:</strong> Symptoms indicate potential neurological distress. Risk Score: 8.5/10.</div>
+                            </div>
+                            <div class="ai-input-group">
+                                <input type="text" id="chat-input" placeholder="Type symptom details...">
+                                <button class="btn-send" id="send-btn">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 3: ELECTRONIC RECORDS (EMR) -->
+                <div id="page-emr" class="page-view">
+                    <h2 class="page-title">Electronic Medical Records (EMR)</h2>
+                    <div class="module-card">
+                        <div class="module-header">
+                            <div class="module-title">Secure Patient Database File Repository</div>
+                            <span class="badge">Encrypted Storage</span>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Patient ID</th>
+                                    <th>Full Name</th>
+                                    <th>Primary Condition</th>
+                                    <th>AI Risk Score</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#PAT-8942</td>
+                                    <td>John Doe</td>
+                                    <td>Hypertension / Dizziness</td>
+                                    <td style="color: var(--danger); font-weight: bold;">8.5/10</td>
+                                    <td><span class="badge" style="background:#fee2e2; color:var(--danger);">Critical Review</span></td>
+                                </tr>
+                                <tr>
+                                    <td>#PAT-8943</td>
+                                    <td>Jane Smith</td>
+                                    <td>Acute Respiratory Infection</td>
+                                    <td style="color: var(--warning); font-weight: bold;">5.2/10</td>
+                                    <td><span class="badge" style="background:#fef3c7; color:var(--warning);">Monitoring</span></td>
+                                </tr>
+                                <tr>
+                                    <td>#PAT-8944</td>
+                                    <td>Robert Johnson</td>
+                                    <td>Post-Op Follow-up</td>
+                                    <td style="color: var(--success); font-weight: bold;">1.1/10</td>
+                                    <td><span class="badge" style="background:#d1fae5; color:var(--success);">Stable</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- PAGE 4: INSURANCE & BILLING -->
+                <div id="page-insurance" class="page-view">
+                    <h2 class="page-title">Insurance & Billing Management</h2>
+                    <div class="modules-grid">
+                        <div class="module-card">
+                            <div class="module-header">
+                                <div class="module-title">💳 Active Insurance Coverage</div>
+                                <span class="badge">Verified Policy</span>
+                            </div>
+                            <form id="insurance-form" onsubmit="saveInsurance(event)">
+                                <div class="form-group">
+                                    <label>Insurance Provider Type</label>
+                                    <select id="ins-provider" required>
+                                        <option value="BlueCross BlueShield">BlueCross BlueShield (PPO/HMO)</option>
+                                        <option value="Aetna Global">Aetna Global Healthcare</option>
+                                        <option value="UnitedHealthcare">UnitedHealthcare Commercial</option>
+                                        <option value="Medicare / Medicaid">Medicare / Medicaid Federal</option>
+                                        <option value="Private International">Private International Coverage</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Policy / Member ID</label>
+                                    <input type="text" id="ins-policy" placeholder="e.g., BCBS-9842109-X" required value="BCBS-9842109-X">
+                                </div>
+                                <div class="form-group">
+                                    <label>Primary Group Number</label>
+                                    <input type="text" id="ins-group" placeholder="e.g., GRP-4402" required value="GRP-4402">
+                                </div>
+                                <button type="submit" class="btn btn-start" style="width: 100%;">Update & Verify Coverage</button>
+                            </form>
+                            <div id="ins-feedback" style="margin-top: 15px; font-weight: 600; color: var(--success); display: none;"></div>
+                        </div>
+
+                        <div class="module-card">
+                            <div class="module-header">
+                                <div class="module-title">📋 Claims & Billing History</div>
+                                <span class="badge">Real-Time Ledger</span>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Claim ID</th>
+                                        <th>Service Type</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>#CLM-9012</td>
+                                        <td>AI Triage & Consult</td>
+                                        <td>$150.00</td>
+                                        <td><span class="badge" style="background:#d1fae5; color:var(--success);">Covered / Paid</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>#CLM-8834</td>
+                                        <td>Diagnostic Lab Panels</td>
+                                        <td>$320.00</td>
+                                        <td><span class="badge" style="background:#fef3c7; color:var(--warning);">Processing</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 5: ROBOT DISPATCH -->
+                <div id="page-robot" class="page-view">
+                    <h2 class="page-title">Autonomous Robot Fleet Dispatch</h2>
+                    <div class="modules-grid">
+                        <div class="module-card">
+                            <div class="module-header"><div class="module-title">Active Fleet Logistics</div></div>
+                            <ul class="robot-list">
+                                <li class="robot-item">
+                                    <div><span class="status-dot status-active"></span> <strong>MediBot-01</strong></div>
+                                    <span style="color: var(--text-muted); font-size: 0.9rem;">En Route: Room 302</span>
+                                </li>
+                                <li class="robot-item">
+                                    <div><span class="status-dot status-active"></span> <strong>MediBot-02</strong></div>
+                                    <span style="color: var(--text-muted); font-size: 0.9rem;">Delivering: Lab B</span>
+                                </li>
+                                <li class="robot-item">
+                                    <div><span class="status-dot status-charging"></span> <strong>MediBot-03</strong></div>
+                                    <span style="color: var(--text-muted); font-size: 0.9rem;">Docked / Charging (88%)</span>
+                                </li>
+                            </ul>
+                            <button id="dispatch-btn" class="btn btn-start" style="width: 100%; margin-top: 20px;">Dispatch New Robot Unit</button>
+                        </div>
+                        <div class="module-card">
+                            <div class="module-header"><div class="module-title">Fleet Diagnostics & Telemetry</div></div>
+                            <p style="color: var(--text-muted); margin-bottom: 10px;">LiDAR Mapping: 100% synchronized</p>
+                            <p style="color: var(--text-muted); margin-bottom: 10px;">Elevator Interfacing APIs: Operational</p>
+                            <p style="color: var(--text-muted);">UV-C Internal Sterilization Cycles: Completed</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 6: APPOINTMENTS & REMINDERS -->
+                <div id="page-appointments" class="page-view">
+                    <h2 class="page-title">Smart Appointment & Notification Hub</h2>
+                    <div class="module-card">
+                        <div class="module-header">
+                            <div class="module-title">Automated SMS & WhatsApp Reminder Creator</div>
+                            <span class="badge">Instant Dispatch</span>
+                        </div>
+                        <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">Schedule follow-ups and instantly send patient notifications containing doctor information and medical guidelines.</p>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                            <input type="text" id="appt-patient" placeholder="Patient Name" style="padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px;">
+                            <input type="text" id="appt-doctor" placeholder="Doctor Name (e.g., Dr. Smith)" style="padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px;">
+                            <input type="text" id="appt-disease" placeholder="Condition / Disease Notes" style="padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px;">
+                            <input type="text" id="appt-phone" placeholder="Phone Number (SMS/WhatsApp)" style="padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px;">
+                            <input type="datetime-local" id="appt-date" style="padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px;">
+                        </div>
+                        <button id="book-appt-btn" class="btn btn-start" style="width: 100%; padding: 12px;">Schedule & Dispatch Automated Reminder</button>
+                        <div id="appt-feedback" style="margin-top: 15px; font-weight: 600; color: var(--success); display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- PAGE 7: SECURITY SETTINGS -->
+                <div id="page-security" class="page-view">
+                    <h2 class="page-title">System Security & Access Control</h2>
+                    <div class="modules-grid">
+                        <div class="module-card">
+                            <div class="module-header"><div class="module-title">Authentication & Permissions</div></div>
+                            <p style="color: var(--text-muted); margin-bottom: 12px;">Two-Factor Authentication (2FA): <strong>Enforced</strong></p>
+                            <p style="color: var(--text-muted); margin-bottom: 12px;">Role-Based Access Control (RBAC): <strong>Active</strong></p>
+                            <p style="color: var(--text-muted);">Data Encryption Standard: <strong>AES-256 Bit</strong></p>
+                        </div>
+                        <div class="module-card">
+                            <div class="module-header"><div class="module-title">Cloud Backups & Compliance</div></div>
+                            <p style="color: var(--text-muted); margin-bottom: 12px;">Automated Hourly Cloud Backups: <strong>Running</strong></p>
+                            <p style="color: var(--text-muted);">HIPAA / Global Healthcare Data Compliance: <strong>Verified</strong></p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT FOR AUTHENTICATION & SPA NAVIGATION -->
+    <script>
+        // --- LOGIN & LOGOUT FLOW ---
+        function handleLogin(event) {
+            event.preventDefault();
+            document.getElementById('page-login').classList.add('hidden');
+            document.getElementById('app-container').classList.add('active-app');
+        }
+
+        function handleLogout() {
+            document.getElementById('app-container').classList.remove('active-app');
+            document.getElementById('page-login').classList.remove('hidden');
+        }
+
+        // --- PAGE ROUTING / TAB SWITCHING ---
+        const navLinks = document.querySelectorAll('.nav-menu a[data-target]');
+        const pages = document.querySelectorAll('.page-view');
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                const targetId = link.getAttribute('data-target');
+
+                navLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+
+                pages.forEach(page => {
+                    if (page.id === targetId) {
+                        page.classList.add('active-page');
+                    } else {
+                        page.classList.remove('active-page');
+                    }
+                });
+            });
+        });
+
+        // --- INSURANCE FORM LOGIC ---
+        function saveInsurance(event) {
+            event.preventDefault();
+            const provider = document.getElementById('ins-provider').value;
+            const policy = document.getElementById('ins-policy').value;
+            const feedback = document.getElementById('ins-feedback');
+
+            feedback.style.display = 'block';
+            feedback.innerText = `Success! ${provider} policy (${policy}) verified and linked to patient account.`;
+        }
+
+        // --- CAMERA RECORDER LOGIC ---
+        let mediaRecorder;
+        let recordedChunks = [];
+        let videoBlob;
+        const liveVideo = document.getElementById('live-video');
+        const startBtn = document.getElementById('start-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const uploadBtn = document.getElementById('upload-btn');
+        const videoAiResult = document.getElementById('video-ai-result');
+        const diagnosisText = document.getElementById('diagnosis-text');
+
+        async function setupCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                liveVideo.srcObject = stream;
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+                mediaRecorder.onstop = () => {
+                    videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
+                    uploadBtn.style.display = 'block';
+                };
+            } catch (err) { console.log("Camera access not available."); }
+        }
+        setupCamera();
+
+        if (startBtn) {
+            startBtn.addEventListener('click', () => {
+                recordedChunks = [];
+                mediaRecorder.start();
+                startBtn.style.display = 'none';
+                stopBtn.style.display = 'block';
+            });
+        }
+
+        if (stopBtn) {
+            stopBtn.addEventListener('click', () => {
+                mediaRecorder.stop();
+                stopBtn.style.display = 'none';
+                startBtn.style.display = 'block';
+                startBtn.innerText = "🔄 Re-record";
+            });
+        }
+
+        if (uploadBtn) {
+            uploadBtn.addEventListener('click', () => {
+                uploadBtn.innerText = "⏳ Analyzing Video & Storing in Database...";
+                setTimeout(() => {
+                    uploadBtn.innerText = "✅ Successfully Saved to EMR Database";
+                    uploadBtn.style.backgroundColor = "var(--success)";
+                    videoAiResult.style.display = 'block';
+                    diagnosisText.innerText = "Speech-to-text parsed. Condition identified: Mild inflammation. EMR file updated automatically.";
+                }, 2000);
+            });
+        }
+
+        // --- TEXT CHAT LOGIC ---
+        const sendBtn = document.getElementById('send-btn');
+        const chatInput = document.getElementById('chat-input');
+        const chatBox = document.getElementById('chat-box');
+
+        if (sendBtn) {
+            sendBtn.addEventListener('click', () => {
+                const text = chatInput.value.trim();
+                if (!text) return;
+                chatBox.innerHTML += `<div class="patient-message"><strong>Patient/Doctor Override:</strong> "${text}"</div>`;
+                chatInput.value = '';
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+                setTimeout(() => {
+                    chatBox.innerHTML += `<div class="ai-message"><strong>AI System:</strong> Clinical note reviewed. Priority status updated successfully.</div>`;
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }, 1000);
+            });
+        }
+
+        // --- ROBOT DISPATCH LOGIC ---
+        const dispatchBtn = document.getElementById('dispatch-btn');
+        if (dispatchBtn) {
+            dispatchBtn.addEventListener('click', function() {
+                const original = this.innerHTML;
+                this.innerHTML = "⏳ Deploying Autonomous Unit...";
+                setTimeout(() => {
+                    this.innerHTML = "✅ MediBot-04 Deployed Successfully!";
+                    this.style.backgroundColor = "var(--success)";
+                    setTimeout(() => {
+                        this.innerHTML = original;
+                        this.style.backgroundColor = "var(--primary)";
+                    }, 3000);
+                }, 1500);
+            });
+        }
+
+        // --- APPOINTMENT NOTIFICATION LOGIC ---
+        const bookApptBtn = document.getElementById('book-appt-btn');
+        const apptFeedback = document.getElementById('appt-feedback');
+
+        if (bookApptBtn) {
+            bookApptBtn.addEventListener('click', () => {
+                const patient = document.getElementById('appt-patient').value.trim();
+                const doctor = document.getElementById('appt-doctor').value.trim();
+                const phone = document.getElementById('appt-phone').value.trim();
+                
+                if (!patient || !doctor || !phone) {
+                    alert("Please fill in the required patient, doctor, and phone number fields.");
+                    return;
+                }
+
+                bookApptBtn.innerText = "⏳ Dispatching Automated SMS / WhatsApp...";
+                setTimeout(() => {
+                    apptFeedback.style.display = 'block';
+                    apptFeedback.innerText = `Success! Automated reminder sent to ${phone} with details for ${doctor}.`;
+                    bookApptBtn.innerText = "Schedule & Dispatch Automated Reminder";
+                }, 2000);
+            });
+        }
+    </script>
+    <!-- ADD TO SIDEBAR NAVIGATION -->
+<!-- <li><a data-target="page-family-care">❤️ Family Care Bridge</a></li> -->
+
+<!-- PAGE: FAMILY CARE & EMPATHY BRIDGE -->
+<div id="page-family-care" class="page-view">
+    <h2 class="page-title">❤️ AI Family Care & Empathy Bridge</h2>
+    <div class="modules-grid">
+        <div class="module-card">
+            <div class="module-header">
+                <div class="module-title">Live Patient Recovery Feed for Loved Ones</div>
+                <span class="badge" style="background:#dcfce7; color:#166534;">Connected</span>
+            </div>
+            <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.95rem;">Keep families informed and at ease with real-time, compassionate updates translated straight from the patient's clinical milestones.</p>
+            
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 15px;">
+                <p style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 6px;"><strong>🕒 Today at 10:45 AM</strong></p>
+                <p style="font-size: 0.95rem; color: var(--text-muted);">"John completed his morning walking exercise with MediBot assistance. Vital signs are optimal!"</p>
+            </div>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+                <p style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 6px;"><strong>🕒 Yesterday at 4:15 PM</strong></p>
+                <p style="font-size: 0.95rem; color: var(--text-muted);">"Doctor review completed. Post-op recovery is progressing 20% faster than average milestones."</p>
+            </div>
+        </div>
+
+        <div class="module-card">
+            <div class="module-header">
+                <div class="module-title">Voice-to-Family Bridge</div>
+            </div>
+            <p style="color: var(--text-muted); margin-bottom: 15px; font-size: 0.95rem;">Allow patients to record a quick comforting voice message for their family right from their hospital bed.</p>
+            
+            <div style="text-align: center; padding: 30px; background: #f8fafc; border-radius: 8px; border: 2px dashed #cbd5e0;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🎙️</div>
+                <p style="font-weight: 600; margin-bottom: 15px;">Press to record message for family</p>
+                <button class="btn btn-start" onclick="alert('Voice message recorded, optimized by AI, and dispatched via WhatsApp to family!')">Record Voice Note</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

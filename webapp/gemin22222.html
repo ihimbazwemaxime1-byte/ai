@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NextGen AI Smart Healthcare Ecosystem</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* === 1. GLOBAL VARIABLES & RESET === */
+        :root {
+            --primary: #2563eb; --primary-dark: #1d4ed8; --secondary: #0ea5e9; --accent: #38bdf8;
+            --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+            --bg-body: #f8fafc; --bg-card: #ffffff; --bg-sidebar: #0f172a;
+            --text-main: #0f172a; --text-muted: #64748b; --text-light: #f8fafc;
+            --radius-lg: 16px; --radius-md: 12px; --radius-sm: 8px;
+            --shadow-float: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; }
+
+        /* === 2. AUTHENTICATION GATEWAY === */
+        #auth-gateway {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #2563eb 100%);
+            display: flex; justify-content: center; align-items: center; z-index: 1000; transition: opacity 0.5s ease;
+        }
+        .auth-container { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 40px; border-radius: var(--radius-lg); box-shadow: var(--shadow-float); width: 100%; max-width: 420px; }
+        .auth-header { text-align: center; margin-bottom: 30px; }
+        .auth-header h1 { color: var(--primary); font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+        .auth-header p { color: var(--text-muted); font-size: 0.95rem; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; }
+        .input-element { width: 100%; padding: 14px 16px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: var(--radius-sm); font-size: 1rem; outline: none; transition: 0.2s; }
+        .input-element:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .btn-submit { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: var(--radius-sm); font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-submit:hover { background: var(--primary-dark); }
+        .hidden { display: none !important; }
+
+        /* === 3. MAIN WORKSPACE SHELL === */
+        #app-ecosystem { display: none; width: 100%; height: 100%; }
+        .sidebar { width: 280px; background: var(--bg-sidebar); color: var(--text-light); display: flex; flex-direction: column; z-index: 10; }
+        .sidebar-brand { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 1.4rem; font-weight: 700; display: flex; gap: 10px; }
+        .sidebar-brand span { color: var(--accent); }
+        .sidebar-nav { padding: 20px 15px; flex: 1; overflow-y: auto; list-style: none; }
+        .nav-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #475569; margin: 20px 0 10px 10px; font-weight: 700; }
+        .nav-link { display: flex; align-items: center; gap: 12px; padding: 12px 15px; color: #94a3b8; text-decoration: none; border-radius: var(--radius-sm); font-weight: 500; font-size: 0.95rem; cursor: pointer; transition: 0.2s; margin-bottom: 4px; }
+        .nav-link:hover, .nav-link.active { background: rgba(37, 99, 235, 0.1); color: var(--accent); }
+        .main-workspace { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .top-navbar { background: var(--bg-card); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-card); z-index: 5; }
+        .search-container input { width: 400px; padding: 10px 20px; border-radius: 20px; border: 1px solid #e2e8f0; background: #f8fafc; outline: none; }
+        .user-menu { display: flex; align-items: center; gap: 15px; }
+        .role-pill { background: #dbeafe; color: var(--primary-dark); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+        
+        /* === 4. DASHBOARD COMPONENTS & GRIDS === */
+        .dashboard-canvas { padding: 30px; overflow-y: auto; flex: 1; }
+        .page-view { display: none; animation: fadeIn 0.3s ease; }
+        .page-view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .page-title { margin-bottom: 24px; font-size: 1.8rem; font-weight: 700; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 24px; }
+        .kpi-card { background: var(--bg-card); padding: 20px; border-radius: var(--radius-md); border-top: 4px solid var(--primary); box-shadow: var(--shadow-card); }
+        .kpi-title { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; font-weight: 600; }
+        .kpi-value { font-size: 2rem; font-weight: 700; }
+        .module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 24px; align-items: start; }
+        .module-card { background: var(--bg-card); padding: 24px; border-radius: var(--radius-md); box-shadow: var(--shadow-card); }
+        .module-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; font-size: 1.1rem; font-weight: 600; }
+        .badge { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; }
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .btn-action { padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-action:hover { background: var(--primary-dark); }
+        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 0.9rem; }
+
+        /* === 5. DOCTOR WORKSPACE: 3-COLUMN LAYOUT === */
+        .doc-workspace { display: grid; grid-template-columns: 300px 1fr 350px; gap: 20px; height: calc(100vh - 150px); }
+        .doc-panel { background: var(--bg-card); border-radius: var(--radius-md); box-shadow: var(--shadow-card); display: flex; flex-direction: column; overflow: hidden; border: 1px solid #e2e8f0; }
+        .panel-header { padding: 15px 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+        .panel-body { padding: 20px; overflow-y: auto; flex: 1; }
+        .queue-item { padding: 15px; border: 1px solid #e2e8f0; border-radius: var(--radius-sm); margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
+        .queue-item:hover, .queue-item.active { border-color: var(--primary); background: #f0f9ff; }
+        .queue-item h4 { margin-bottom: 5px; font-size: 1rem; color: var(--text-main); }
+        .queue-time { font-size: 0.8rem; color: var(--text-muted); }
+        .patient-header { display: flex; gap: 20px; align-items: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #e2e8f0; }
+        .patient-avatar { width: 60px; height: 60px; background: var(--primary); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; font-weight: bold; }
+        .timeline-box { padding: 15px; background: #f8fafc; border-left: 3px solid var(--primary); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin-bottom: 20px; }
+        .timeline-date { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px; font-weight: 600; }
+        .dictation-box { position: relative; margin-bottom: 20px; }
+        .dictation-box textarea { width: 100%; height: 120px; padding: 15px; border: 1px solid #cbd5e0; border-radius: var(--radius-sm); outline: none; resize: none; font-size: 0.95rem; line-height: 1.5; }
+        .dictate-btn { position: absolute; bottom: 15px; right: 15px; background: var(--danger); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3); }
+        .dictate-btn.recording { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .action-btn { padding: 12px; background: #f1f5f9; border: 1px solid #cbd5e0; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text-main); transition: 0.2s; }
+        .action-btn:hover { background: #e2e8f0; border-color: var(--primary); color: var(--primary); }
+        .alert-card { padding: 15px; border-radius: var(--radius-sm); margin-bottom: 15px; border-left: 4px solid; }
+        .alert-card.high { background: #fee2e2; border-left-color: var(--danger); }
+        .alert-card.med { background: #fef3c7; border-left-color: var(--warning); }
+        .alert-title { font-weight: 700; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+        .ai-suggestion { background: #f0f9ff; padding: 15px; border-radius: var(--radius-sm); border: 1px solid #bae6fd; font-size: 0.9rem; line-height: 1.5; color: #0369a1; }
+
+        /* === 6. CHAT MESSENGER UI === */
+        .messenger-layout { display: flex; height: 60vh; border: 1px solid #e2e8f0; border-radius: var(--radius-md); overflow: hidden; background: var(--bg-card); }
+        .messenger-sidebar { width: 300px; background: #f8fafc; border-right: 1px solid #e2e8f0; }
+        .contact-item { padding: 15px 20px; border-bottom: 1px solid #e2e8f0; cursor: pointer; }
+        .contact-item.active { background: #e0f2fe; }
+        .messenger-chat-area { flex: 1; display: flex; flex-direction: column; }
+        .chat-history { flex: 1; padding: 20px; overflow-y: auto; background: #f1f5f9; display: flex; flex-direction: column; gap: 10px; }
+        .chat-bubble { max-width: 70%; padding: 12px 16px; border-radius: 20px; font-size: 0.95rem; }
+        .chat-bubble.received { background: white; border: 1px solid #e2e8f0; align-self: flex-start; border-bottom-left-radius: 0; }
+        .chat-bubble.sent { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 0; }
+        .chat-input-area { padding: 15px; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 10px; }
+        .chat-input-area input { flex: 1; padding: 12px; border: 1px solid #cbd5e0; border-radius: 20px; outline: none; }
+
+        /* === 7. TELEMEDICINE CAMERA UI === */
+        video { width: 100%; background: #0f172a; border-radius: 8px; margin-bottom: 15px; aspect-ratio: 16/9; object-fit: cover; }
+        .tele-container { background: #0f172a; height: 400px; border-radius: 8px; display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 20px; overflow: hidden; }
+        .tele-pip { width: 140px; height: 180px; background: #1e293b; position: absolute; bottom: 20px; right: 20px; border-radius: 8px; border: 2px solid white; object-fit: cover; box-shadow: var(--shadow-float); z-index: 5; }
+
+        /* === 8. ROBOTICS FLOORPLAN & ANIMATION === */
+        .sim-container { background: #1e293b; padding: 20px; border-radius: var(--radius-md); position: relative; height: 250px; border: 1px solid #334155; }
+        .sim-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; height: 100%; }
+        .sim-zone { border: 1px dashed #475569; border-radius: var(--radius-sm); display: flex; justify-content: center; align-items: center; color: #94a3b8; font-size: 0.8rem; font-weight: 600; text-align: center; }
+        .bot-dot { position: absolute; width: 24px; height: 24px; background: var(--accent); border-radius: 50%; top: 40px; left: 40px; box-shadow: 0 0 15px var(--accent); transition: transform 4s linear, background-color 0.5s ease; display: flex; justify-content: center; align-items: center; font-size: 0.65rem; color: #000; font-weight: bold; z-index: 10; }
+        .bot-dot.moving { transform: translate(320px, 120px); background: var(--success); box-shadow: 0 0 15px var(--success); }
+        .sim-log-box { background: #0f172a; color: #38bdf8; font-family: monospace; font-size: 0.8rem; padding: 12px; border-radius: 8px; height: 100px; overflow-y: auto; border: 1px solid #1e293b; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+    <!-- ========================================== -->
+    <!-- 1. LOGIN GATEWAY                           -->
+    <!-- ========================================== -->
+    <div id="auth-gateway">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h1>🏥 NextGen <span>AI</span></h1>
+                <p>Smart Healthcare Ecosystem</p>
+            </div>
+            <form onsubmit="executeLogin(event)">
+                <div class="form-group">
+                    <label>Ecosystem Role</label>
+                    <select class="input-element" id="user-role" required>
+                        <option value="" disabled selected>Select your access level...</option>
+                        <option value="patient">👤 Patient Portal</option>
+                        <option value="doctor">🩺 Physician Terminal</option>
+                        <option value="admin">⚙️ Hospital Admin (Robotics & HMIS)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Identification ID</label>
+                    <input type="text" class="input-element" placeholder="Enter ID..." required value="user123">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" class="input-element" placeholder="••••••••" required value="password">
+                </div>
+                <button type="submit" class="btn-submit">Authenticate Access</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 2. MAIN APPLICATION SHELL                  -->
+    <!-- ========================================== -->
+    <div id="app-ecosystem">
+        <aside class="sidebar">
+            <div class="sidebar-brand">🏥 NextGen <span>AI</span></div>
+            <ul class="sidebar-nav" id="dynamic-nav">
+                <!-- Links injected via JS based on Role -->
+            </ul>
+        </aside>
+
+        <main class="main-workspace">
+            <header class="top-navbar">
+                <div class="search-container"><input type="text" placeholder="Global Search..."></div>
+                <div class="user-menu">
+                    <span class="role-pill" id="display-role">Loading...</span>
+                    <button class="btn-action btn-outline" style="padding: 6px 12px; color: var(--danger); border-color: var(--danger);" onclick="location.reload()">Logout</button>
+                </div>
+            </header>
+
+            <div class="dashboard-canvas">
+                
+                <!-- 1. ADMIN OVERVIEW DASHBOARD (Admin Only) -->
+                <div id="view-dashboard" class="page-view">
+                    <h2 class="page-title">Hospital Command Center Overview</h2>
+                    <div class="kpi-grid">
+                        <div class="kpi-card"><div class="kpi-title">Active Inpatients</div><div class="kpi-value">1,248</div></div>
+                        <div class="kpi-card" style="border-top-color: var(--warning);"><div class="kpi-title">AI Triage Alerts</div><div class="kpi-value">14</div></div>
+                        <div class="kpi-card" style="border-top-color: var(--success);"><div class="kpi-title">Robot Fleet Active</div><div class="kpi-value">22 / 25</div></div>
+                    </div>
+                </div>
+
+                <!-- 2. PATIENT PERSONAL DASHBOARD (Patient Only - FIXED) -->
+                <div id="view-patient-dashboard" class="page-view">
+                    <h2 class="page-title">My Personal Health Overview</h2>
+                    <div class="kpi-grid">
+                        <div class="kpi-card" style="border-top-color: var(--primary);"><div class="kpi-title">Health Score</div><div class="kpi-value" style="color: var(--primary);">92/100</div></div>
+                        <div class="kpi-card" style="border-top-color: var(--success);"><div class="kpi-title">Next Appointment</div><div class="kpi-value" style="font-size: 1.2rem; margin-top:8px;">Tomorrow, 09:00 AM</div><span style="font-size: 0.85rem; color: var(--text-muted);">Dr. Sarah Smith</span></div>
+                        <div class="kpi-card" style="border-top-color: var(--warning);"><div class="kpi-title">Recent BP Reading</div><div class="kpi-value" style="color: var(--warning);">135/88</div><span style="font-size: 0.85rem; color: var(--text-muted);">Sync from Smartwatch</span></div>
+                    </div>
+                    <div class="module-grid">
+                        <div class="module-card">
+                            <div class="module-header"><span>💊 Active Medications</span></div>
+                            <ul style="list-style: none; padding: 0;">
+                                <li style="padding: 10px; background: #f8fafc; border-radius: 6px; margin-bottom: 8px;"><strong>Lisinopril 10mg</strong> - Take 1 daily (Morning)</li>
+                                <li style="padding: 10px; background: #f8fafc; border-radius: 6px;"><strong>Vitamin D3</strong> - Take 1 weekly</li>
+                            </ul>
+                        </div>
+                        <div class="module-card">
+                            <div class="module-header"><span>📅 Upcoming Care Reminders</span></div>
+                            <p style="font-size: 0.9rem; color: var(--text-muted);">• Fast for 12 hours before tomorrow's blood panel.</p>
+                            <p style="font-size: 0.9rem; color: var(--text-muted); margin-top:8px;">• WhatsApp & SMS reminders enabled for +250 780 *** ***.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. DOCTOR WORKSPACE -->
+                <div id="view-doctor-workspace" class="page-view">
+                    <h2 class="page-title" style="margin-bottom: 15px;">Clinical Command Center</h2>
+                    
+                    <div class="doc-workspace">
+                        <!-- Column 1: Queue -->
+                        <div class="doc-panel">
+                            <div class="panel-header">
+                                <span>👥 Patient Queue</span>
+                                <span class="badge badge-warning">4 Waiting</span>
+                            </div>
+                            <div class="panel-body" style="padding: 15px;">
+                                <div class="queue-item active">
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <h4>John Doe (#8942)</h4>
+                                        <span class="badge badge-danger">Triage: High</span>
+                                    </div>
+                                    <div class="queue-time">Waiting: 15 mins • Checkup</div>
+                                </div>
+                                <div class="queue-item">
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <h4>Mary Smith (#8943)</h4>
+                                        <span class="badge badge-warning">Triage: Med</span>
+                                    </div>
+                                    <div class="queue-time">Waiting: 22 mins • Lab Follow-up</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Column 2: EMR & Notes -->
+                        <div class="doc-panel">
+                            <div class="panel-header">
+                                <span>📁 EMR & Clinical Notes</span>
+                                <button class="btn-action btn-outline" style="padding: 4px 10px; font-size: 0.8rem;">View History</button>
+                            </div>
+                            <div class="panel-body">
+                                <div class="patient-header">
+                                    <div class="patient-avatar">JD</div>
+                                    <div>
+                                        <h2 style="font-size: 1.4rem; margin-bottom: 4px;">John Doe</h2>
+                                        <div style="color: var(--text-muted); font-size: 0.9rem;">45 yrs • Male • ID: 1 1980 8 0000000 1 23</div>
+                                        <div style="margin-top: 5px;">
+                                            <span class="badge badge-warning">Allergy: Penicillin</span>
+                                            <span class="badge badge-success">Vitals Synced</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h3 style="font-size: 1rem; margin-bottom: 10px;">Patient Timeline</h3>
+                                <div class="timeline-box">
+                                    <div class="timeline-date">Today, 08:30 AM (AI Triage Entry)</div>
+                                    <p style="font-size: 0.9rem; margin-bottom: 8px;">Patient reported severe headache and dizziness. AI computed Risk Score: 8.5/10 for Acute Hypertension.</p>
+                                </div>
+
+                                <h3 style="font-size: 1rem; margin-bottom: 10px; margin-top: 25px;">Medical Notes & Voice Dictation</h3>
+                                <div class="dictation-box">
+                                    <textarea id="doctor-notes" placeholder="Type clinical notes here or use Voice Dictation..."></textarea>
+                                    <button class="dictate-btn" id="btn-dictate" onclick="toggleDictation()" title="Start AI Voice Dictation">🎙️</button>
+                                </div>
+
+                                <h3 style="font-size: 1rem; margin-bottom: 10px;">Clinical Actions</h3>
+                                <div class="action-grid">
+                                    <button class="action-btn" onclick="alert('Digital Prescription Form Opened')">📝 Digital Prescription</button>
+                                    <button class="action-btn" onclick="alert('Lab Request Sent to Queue')">🔬 Order Lab Test</button>
+                                    <button class="action-btn" onclick="alert('Radiology Request Submitted')">☢️ Request Radiology</button>
+                                    <button class="action-btn" style="color: var(--primary); border-color: var(--primary);" onclick="switchView('view-telemedicine', null)">📹 Start Video Consult</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Column 3: AI CDS -->
+                        <div class="doc-panel">
+                            <div class="panel-header">
+                                <span>🧠 AI Decision Support</span>
+                                <span style="font-size: 1.2rem;">⚡</span>
+                            </div>
+                            <div class="panel-body">
+                                <h3 style="font-size: 0.9rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;">Risk Alerts</h3>
+                                <div class="alert-card high">
+                                    <div class="alert-title"><span style="color: var(--danger);">⚠️ Critical Alert</span></div>
+                                    <div style="font-size: 0.9rem; color: #7f1d1d;">Live wearable data indicates abnormal BP (150/95 mmHg). High risk of hypertensive crisis.</div>
+                                </div>
+                                <div class="alert-card med">
+                                    <div class="alert-title"><span style="color: var(--warning);">⚡ Medication Conflict</span></div>
+                                    <div style="font-size: 0.9rem; color: #78350f;">Patient has a documented allergy to Penicillin. Ensure alternative antibiotics.</div>
+                                </div>
+
+                                <h3 style="font-size: 0.9rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; margin-top: 25px;">AI Suggestions</h3>
+                                <div class="ai-suggestion">
+                                    <strong>Recommended Next Steps:</strong><br><br>
+                                    1. Order a basic metabolic panel (BMP) to check kidney function.<br><br>
+                                    2. Consider increasing Lisinopril dosage to 20mg.<br><br>
+                                    <button class="btn-action" style="width: 100%; margin-top: 10px; font-size: 0.85rem; background: white; color: var(--primary); border: 1px solid var(--primary);">Apply AI Protocol</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. MESSENGER -->
+                <div id="view-messenger" class="page-view">
+                    <h2 class="page-title">Live Care Messenger</h2>
+                    <div class="messenger-layout">
+                        <div class="messenger-sidebar">
+                            <div style="padding: 20px; font-weight: bold; border-bottom: 1px solid #e2e8f0;">Active Consultations</div>
+                            <div class="contact-item active"><strong>Dr. Sarah Smith</strong><br><span style="font-size: 0.8rem; color: var(--text-muted);">Cardiology</span></div>
+                        </div>
+                        <div class="messenger-chat-area">
+                            <div class="chat-history" id="chat-history-box">
+                                <div class="chat-bubble received">Hello! I reviewed your AI Triage report. How is your blood pressure today?</div>
+                            </div>
+                            <div class="chat-input-area">
+                                <input type="text" id="chat-input-field" placeholder="Type a message...">
+                                <button class="btn-action" style="border-radius: 20px;" onclick="sendChatMsg()">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. AI SYMPTOM CHECKER -->
+                <div id="view-symptom" class="page-view">
+                    <h2 class="page-title">AI Symptom Diagnostics</h2>
+                    <div class="module-grid">
+                        <div class="module-card">
+                            <div class="module-header"><span>📹 Visual Diagnostic Recorder</span></div>
+                            <video id="live-video" autoplay muted></video>
+                            <div style="display: flex; gap: 10px;">
+                                <button id="btn-start-record" class="btn-action" style="flex:1;" onclick="startRec()">Turn on Camera</button>
+                                <button id="btn-stop-record" class="btn-action" style="flex:1; background: var(--danger); display:none;" onclick="stopRec()">Stop & Analyze</button>
+                            </div>
+                        </div>
+                        <div class="module-card">
+                            <div class="module-header"><span>🧠 AI Text Triage</span></div>
+                            <div class="chat-history" id="triage-history" style="height: 250px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 15px;">
+                                <div class="chat-bubble received"><strong>AI:</strong> Describe your symptoms in detail.</div>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="triage-input" placeholder="e.g., I have a fever..." style="flex:1; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px;">
+                                <button class="btn-action" onclick="sendTriageMsg()">Analyze</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. TELEMEDICINE (LIVE CAMERA WORKING - FIXED) -->
+                <div id="view-telemedicine" class="page-view">
+                    <h2 class="page-title">Virtual Telemedicine Clinic</h2>
+                    <div class="module-card">
+                        <div class="module-header">
+                            <span>Live Telemedicine Consultation</span>
+                            <span class="badge badge-success">Encrypted WebRTC</span>
+                        </div>
+                        
+                        <div class="tele-container">
+                            <video id="tele-remote-video" autoplay playsinline style="width:100%; height:100%; object-fit:cover; display:none;"></video>
+                            <video id="tele-local-video" autoplay playsinline muted class="tele-pip" style="display:none;"></video>
+                            
+                            <div id="tele-placeholder" style="text-align:center; color:white;">
+                                <div style="font-size: 3.5rem; margin-bottom: 10px;">📹</div>
+                                <h3>Ready for Telemedicine Call</h3>
+                                <p style="color: #94a3b8; font-size: 0.9rem; margin-top: 5px;">Click the button below to initialize live camera and mic stream.</p>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 15px; justify-content: center;">
+                            <button id="btn-start-tele" class="btn-action" onclick="startTeleCall()">📞 Start Telemedicine Call</button>
+                            <button id="btn-mute-tele" class="btn-action btn-outline" onclick="toggleTeleMute()" style="display:none;">🎤 Mute Mic</button>
+                            <button id="btn-end-tele" class="btn-action" style="background: var(--danger); display:none;" onclick="endTeleCall()">🛑 End Call</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. ROBOTICS & IOT LOGISTICS (Admin Only - FIXED) -->
+                <div id="view-robotics" class="page-view">
+                    <h2 class="page-title">🤖 Autonomous Robotics & IoT Logistics</h2>
+                    <div class="module-grid">
+                        <div class="module-card">
+                            <div class="module-header">
+                                <span>Live Floorplan Pathing Simulation</span>
+                                <span class="badge badge-warning" id="robot-status-badge">Docked @ Pharmacy</span>
+                            </div>
+                            
+                            <div class="sim-container">
+                                <div class="sim-grid">
+                                    <div class="sim-zone" style="border-color: var(--success); color: var(--success);">Pharmacy<br>(Start)</div>
+                                    <div class="sim-zone">Corridor A</div>
+                                    <div class="sim-zone">Elevator Bank</div>
+                                    <div class="sim-zone">Corridor B</div>
+                                    <div class="sim-zone" style="border-color: var(--accent); color: var(--accent);">Room 302<br>(Target)</div>
+                                </div>
+                                <div class="bot-dot" id="sim-robot">M1</div>
+                            </div>
+
+                            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                <button class="btn-action" style="flex: 1;" onclick="triggerSimulation()">▶ Run Delivery Route</button>
+                                <button class="btn-action btn-outline" style="flex: 1;" onclick="resetSimulation()">🔄 Reset Position</button>
+                            </div>
+
+                            <div class="sim-log-box" id="sim-log">
+                                > [SYSTEM] Robot Fleet Online. MediBot-01 ready in Pharmacy.<br>
+                            </div>
+                        </div>
+
+                        <div class="module-card">
+                            <div class="module-header"><span>Fleet Status Dashboard</span></div>
+                            <table class="data-table">
+                                <tr>
+                                    <td><strong>MediBot-01</strong></td>
+                                    <td>Medication Dispensing</td>
+                                    <td><span class="badge badge-success" id="table-bot-status">Available</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>CleanBot-X</strong></td>
+                                    <td>UV Sterilization</td>
+                                    <td><span class="badge badge-warning">Charging (15%)</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>AeroDrop-1</strong></td>
+                                    <td>Drone Blood Transport</td>
+                                    <td><span class="badge badge-success">Standby</span></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. HMIS / DHIS2 (Admin Only) -->
+                <div id="view-hmis" class="page-view">
+                    <h2 class="page-title">🌐 DHIS2 / HMIS National Health Sync</h2>
+                    <div class="module-card" style="max-width: 600px;">
+                        <div class="module-header"><span>Ministry of Health Integration</span><span class="badge badge-success">API Online</span></div>
+                        <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem;">
+                            <strong>Last Sync:</strong> Today, 08:00 AM CAT<br><br>
+                            <strong>Pending Records:</strong> <span style="color:var(--warning); font-weight:bold;">142 Cases</span>
+                        </div>
+                        <button id="btn-sync" class="btn-action" style="width: 100%;" onclick="syncDHIS2()">Force Manual Data Sync</button>
+                    </div>
+                </div>
+
+                <!-- 9. PATIENT EMR VIEW -->
+                <div id="view-emr" class="page-view">
+                    <h2 class="page-title">My Medical Records</h2>
+                    <div class="module-card">
+                        <div class="module-header"><span>File: #PAT-8942 (John Doe)</span></div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div style="background: #f8fafc; padding: 15px; border-radius: 8px;">
+                                <strong>Vitals (Wearable IoT Sync):</strong><br>
+                                Heart Rate: 88 BPM<br>
+                                Blood Pressure: <span style="color:var(--danger); font-weight:bold;">150/95 mmHg</span>
+                            </div>
+                            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary);">
+                                <strong>AI Triage Summary:</strong><br>
+                                "Severe headache and blurred vision."<br>
+                                Assessment: Acute hypertension. Risk: 8.5/10
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 10. INSURANCE & BILLING -->
+                <div id="view-insurance" class="page-view">
+                    <h2 class="page-title">Billing & Local Payments</h2>
+                    <div class="module-card" style="max-width: 500px;">
+                        <div class="module-header"><span>💲 Make a Payment</span><span class="badge badge-success">Secure</span></div>
+                        <div style="margin-bottom: 15px;">Outstanding Balance: <strong>120,000 RWF</strong></div>
+                        <input type="number" id="pay-amount" placeholder="Amount (RWF)" style="width: 100%; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; margin-bottom: 10px;">
+                        <select id="pay-method" style="width: 100%; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; margin-bottom: 10px;" onchange="togglePay()">
+                            <option value="momo">🟡 MTN Mobile Money</option>
+                            <option value="airtel">🔴 Airtel Money</option>
+                            <option value="bank">🏦 Bank of Kigali (Transfer)</option>
+                        </select>
+                        <input type="text" id="pay-input" placeholder="MTN Number (e.g., 078...)" style="width: 100%; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; margin-bottom: 15px;">
+                        <button id="btn-pay" class="btn-action" style="width: 100%; background: var(--success);" onclick="processPay()">Initialize Payment</button>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 3. SYSTEM JAVASCRIPT LOGIC                 -->
+    <!-- ========================================== -->
+    <script>
+        // --- 1. ROLE-BASED ACCESS CONTROL (RBAC) ---
+        const roleMenus = {
+            patient: `
+                <div class="nav-label">Health Services</div>
+                <li><a class="nav-link active" onclick="switchView('view-patient-dashboard', this)">🏠 My Health Overview</a></li>
+                <li><a class="nav-link" onclick="switchView('view-symptom', this)">🧠 AI Symptom Checker</a></li>
+                <li><a class="nav-link" onclick="switchView('view-telemedicine', this)">📹 Telemedicine</a></li>
+                <li><a class="nav-link" onclick="switchView('view-messenger', this)">💬 Care Messenger</a></li>
+                <li><a class="nav-link" onclick="switchView('view-emr', this)">📁 My Records</a></li>
+                <div class="nav-label">Administration</div>
+                <li><a class="nav-link" onclick="switchView('view-insurance', this)">💳 Billing & Payments</a></li>
+            `,
+            doctor: `
+                <div class="nav-label">Clinical Hub</div>
+                <li><a class="nav-link active" onclick="switchView('view-doctor-workspace', this)">🩺 Doctor Workspace</a></li>
+                <li><a class="nav-link" onclick="switchView('view-messenger', this)">💬 Patient Messages</a></li>
+                <li><a class="nav-link" onclick="switchView('view-telemedicine', this)">📹 Telemedicine Clinic</a></li>
+            `,
+            admin: `
+                <div class="nav-label">Command Center</div>
+                <li><a class="nav-link active" onclick="switchView('view-dashboard', this)">📊 Hospital Analytics</a></li>
+                <li><a class="nav-link" onclick="switchView('view-robotics', this)">🤖 Robotics Logistics</a></li>
+                <li><a class="nav-link" onclick="switchView('view-hmis', this)">🌐 DHIS2 / HMIS Sync</a></li>
+            `
+        };
+
+        function executeLogin(e) {
+            e.preventDefault();
+            const role = document.getElementById('user-role').value;
+            const roleName = document.getElementById('user-role').options[document.getElementById('user-role').selectedIndex].text;
+            
+            document.getElementById('auth-gateway').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('auth-gateway').classList.add('hidden');
+                document.getElementById('app-ecosystem').style.display = 'flex';
+            }, 300);
+
+            document.getElementById('display-role').innerText = roleName;
+            document.getElementById('dynamic-nav').innerHTML = roleMenus[role];
+            
+            // Route to proper initial page view based on role
+            if(role === 'doctor') {
+                switchView('view-doctor-workspace', document.querySelector('.nav-link'));
+            } else if (role === 'patient') {
+                switchView('view-patient-dashboard', document.querySelector('.nav-link'));
+            } else {
+                switchView('view-dashboard', document.querySelector('.nav-link'));
+            }
+        }
+
+        // --- 2. VIEW ROUTING ---
+        function switchView(viewId, element) {
+            if(element) {
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                element.classList.add('active');
+            }
+            document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
+
+        // --- 3. TELEMEDICINE CAMERA LOGIC (FIXED) ---
+        let teleStream = null;
+
+        async function startTeleCall() {
+            try {
+                teleStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                
+                const localVid = document.getElementById('tele-local-video');
+                const remoteVid = document.getElementById('tele-remote-video');
+                
+                localVid.srcObject = teleStream;
+                localVid.style.display = 'block';
+
+                remoteVid.srcObject = teleStream; // Live camera view in full window
+                remoteVid.style.display = 'block';
+
+                document.getElementById('tele-placeholder').style.display = 'none';
+                document.getElementById('btn-start-tele').style.display = 'none';
+                document.getElementById('btn-mute-tele').style.display = 'inline-block';
+                document.getElementById('btn-end-tele').style.display = 'inline-block';
+            } catch (e) {
+                alert("Camera and microphone permissions are required for Telemedicine: " + e.message);
+            }
+        }
+
+        function endTeleCall() {
+            if (teleStream) {
+                teleStream.getTracks().forEach(t => t.stop());
+                teleStream = null;
+            }
+            document.getElementById('tele-local-video').style.display = 'none';
+            document.getElementById('tele-remote-video').style.display = 'none';
+            document.getElementById('tele-placeholder').style.display = 'block';
+            document.getElementById('btn-start-tele').style.display = 'inline-block';
+            document.getElementById('btn-mute-tele').style.display = 'none';
+            document.getElementById('btn-end-tele').style.display = 'none';
+        }
+
+        function toggleTeleMute() {
+            if (teleStream) {
+                const audioTrack = teleStream.getAudioTracks()[0];
+                if (audioTrack) {
+                    audioTrack.enabled = !audioTrack.enabled;
+                    document.getElementById('btn-mute-tele').innerText = audioTrack.enabled ? "🎤 Mute Mic" : "🎙️ Unmute Mic";
+                }
+            }
+        }
+
+        // --- 4. ROBOTICS SIMULATION LOGIC (FIXED) ---
+        function triggerSimulation() {
+            const bot = document.getElementById('sim-robot');
+            const logBox = document.getElementById('sim-log');
+            const badge = document.getElementById('robot-status-badge');
+            const tableStatus = document.getElementById('table-bot-status');
+
+            bot.classList.add('moving');
+            badge.innerText = "En Route to Room 302";
+            badge.className = "badge badge-success";
+            tableStatus.innerText = "En Route";
+
+            logBox.innerHTML += `> [14:02:01] Route dispatch confirmed for MediBot-01.<br>`;
+            logBox.innerHTML += `> [14:02:02] Navigating corridor grid...<br>`;
+            
+            setTimeout(() => {
+                logBox.innerHTML += `> [14:02:05] <span style="color:var(--success);">Arrived at Room 302. Payload ready.</span><br>`;
+                logBox.scrollTop = logBox.scrollHeight;
+            }, 4000);
+        }
+
+        function resetSimulation() {
+            const bot = document.getElementById('sim-robot');
+            const logBox = document.getElementById('sim-log');
+            const badge = document.getElementById('robot-status-badge');
+            const tableStatus = document.getElementById('table-bot-status');
+
+            bot.classList.remove('moving');
+            badge.innerText = "Docked @ Pharmacy";
+            badge.className = "badge badge-warning";
+            tableStatus.innerText = "Available";
+
+            logBox.innerHTML += `> [SYSTEM] MediBot-01 reset to Pharmacy docking station.<br>`;
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        // --- 5. VOICE DICTATION & MESSAGING ---
+        let isDictating = false;
+        function toggleDictation() {
+            const btn = document.getElementById('btn-dictate');
+            const textArea = document.getElementById('doctor-notes');
+            if (!isDictating) {
+                isDictating = true;
+                btn.classList.add('recording');
+                btn.innerText = '⏹️';
+                textArea.value += "\n[AI Listening...] ";
+                setTimeout(() => {
+                    if(isDictating) {
+                        textArea.value = textArea.value.replace("[AI Listening...] ", "");
+                        typeWriter("Patient presents with acute hypertension. Adjusted medication protocol as per AI clinical guidelines.", textArea);
+                    }
+                }, 1500);
+            } else {
+                isDictating = false;
+                btn.classList.remove('recording');
+                btn.innerText = '🎙️';
+                textArea.value = textArea.value.replace("\n[AI Listening...] ", "");
+            }
+        }
+
+        function typeWriter(text, element) {
+            let i = 0;
+            function type() {
+                if (i < text.length && isDictating) {
+                    element.value += text.charAt(i);
+                    i++;
+                    setTimeout(type, 30);
+                }
+            }
+            type();
+        }
+
+        function sendChatMsg() {
+            const input = document.getElementById('chat-input-field');
+            const box = document.getElementById('chat-history-box');
+            if(!input.value) return;
+            box.innerHTML += `<div class="chat-bubble sent">${input.value}</div>`;
+            input.value = ''; box.scrollTop = box.scrollHeight;
+            setTimeout(() => {
+                box.innerHTML += `<div class="chat-bubble received">Message logged securely.</div>`;
+                box.scrollTop = box.scrollHeight;
+            }, 1000);
+        }
+
+        function sendTriageMsg() {
+            const input = document.getElementById('triage-input');
+            const box = document.getElementById('triage-history');
+            if(!input.value) return;
+            box.innerHTML += `<div class="chat-bubble sent">${input.value}</div>`;
+            input.value = ''; box.scrollTop = box.scrollHeight;
+            setTimeout(() => {
+                box.innerHTML += `<div class="chat-bubble received"><strong>AI:</strong> Symptoms logged to EMR for review.</div>`;
+                box.scrollTop = box.scrollHeight;
+            }, 1000);
+        }
+
+        // Camera Logic
+        let mediaStream = null;
+        async function startRec() {
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                document.getElementById('live-video').srcObject = mediaStream;
+                document.getElementById('btn-start-record').style.display = 'none';
+                document.getElementById('btn-stop-record').style.display = 'block';
+            } catch(e) { alert("Camera access denied."); }
+        }
+        function stopRec() {
+            if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+            document.getElementById('btn-stop-record').style.display = 'none';
+            document.getElementById('btn-start-record').style.display = 'block';
+            document.getElementById('btn-start-record').innerText = "🔄 Re-record";
+        }
+
+        // HMIS & Payments
+        function syncDHIS2() {
+            const btn = document.getElementById('btn-sync');
+            btn.innerText = "⏳ Syncing with MOH Servers...";
+            btn.style.background = "var(--warning)";
+            setTimeout(() => {
+                btn.innerText = "✅ Synchronization Complete";
+                btn.style.background = "var(--success)";
+                setTimeout(() => { btn.innerText = "Force Manual Data Sync"; btn.style.background = "var(--primary)"; }, 3000);
+            }, 2000);
+        }
+
+        function togglePay() {
+            const method = document.getElementById('pay-method').value;
+            const input = document.getElementById('pay-input');
+            if(method === 'bank') input.placeholder = "Enter Bank Transfer Reference (e.g. BK-12345)";
+            else if(method === 'airtel') input.placeholder = "Airtel Number (e.g. 073...)";
+            else input.placeholder = "MTN Number (e.g. 078...)";
+        }
+
+        function processPay() {
+            const amt = document.getElementById('pay-amount').value;
+            const btn = document.getElementById('btn-pay');
+            if(!amt) return alert("Enter amount in RWF.");
+            btn.innerText = "⏳ Processing securely...";
+            btn.style.background = "var(--primary)";
+            setTimeout(() => {
+                alert(`Transaction for ${amt} RWF successfully simulated.`);
+                btn.innerText = "✅ Payment Initiated";
+                btn.style.background = "var(--success)";
+                setTimeout(() => { btn.innerText = "Initialize Payment"; }, 3000);
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
