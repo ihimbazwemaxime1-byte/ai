@@ -9,11 +9,11 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         :root {
-            --primary: #0a2540;
-            --primary-light: #1a3a5c;
+            --primary: #0f2b45;
+            --primary-light: #1a3f5e;
             --secondary: #2a6f8f;
             --accent: #4a9ab5;
-            --bg-body: #edf0f5;
+            --bg-body: #eef2f7;
             --bg-card: #ffffff;
             --bg-nav: #0a1a2a;
             --text-main: #1a2a3a;
@@ -22,6 +22,9 @@
             --shadow: 0 4px 16px rgba(0,0,0,0.05);
             --radius: 16px;
             --radius-sm: 10px;
+            --success: #1a6e4a;
+            --warning: #8a6d1f;
+            --danger: #a14545;
         }
         body { background: var(--bg-body); color: var(--text-main); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
@@ -154,34 +157,43 @@
         }
         .btn-outline-action:hover { border-color: var(--primary); color: var(--primary); background: #f5f7fa; }
 
-        /* ROBOTICS - ENHANCED */
-        .robot-fleet-status {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px;
+        /* BILLING - CLEAN TEMPLATE */
+        .payment-methods {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0;
         }
-        .robot-status-item {
-            background: #f8fafc; padding: 10px 14px; border-radius: var(--radius-sm);
-            border: 1px solid var(--border-light); text-align: center;
+        .payment-method {
+            padding: 12px; border: 2px solid var(--border-light); border-radius: var(--radius-sm);
+            text-align: center; cursor: pointer; transition: 0.2s;
+            background: white;
         }
-        .robot-status-item .label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
-        .robot-status-item .value { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
-        .robot-status-item .value.online { color: #1a6e4a; }
-        .robot-status-item .value.busy { color: #8a6d1f; }
-        .robot-status-item .value.offline { color: #a14545; }
+        .payment-method:hover { border-color: var(--secondary); }
+        .payment-method.active { border-color: var(--primary); background: #f5f8fc; }
+        .payment-method .icon { font-size: 1.8rem; display: block; margin-bottom: 4px; }
+        .payment-method .name { font-size: 0.75rem; font-weight: 600; color: var(--text-main); }
+        .payment-method .sub { font-size: 0.65rem; color: var(--text-muted); }
 
-        .robot-timeline {
-            background: #f8fafc; padding: 14px; border-radius: var(--radius-sm);
-            border: 1px solid var(--border-light); margin-top: 12px;
-            max-height: 120px; overflow-y: auto;
-        }
-        .robot-timeline .event {
-            display: flex; justify-content: space-between; padding: 4px 0;
-            font-size: 0.8rem; border-bottom: 1px solid #eef1f5;
-        }
-        .robot-timeline .event:last-child { border-bottom: none; }
-        .robot-timeline .time { color: var(--text-muted); font-size: 0.7rem; }
-        .robot-timeline .status-done { color: #1a6e4a; }
-        .robot-timeline .status-progress { color: #8a6d1f; }
+        .payment-form { background: #f8fafc; padding: 16px; border-radius: var(--radius-sm); margin-top: 12px; }
+        .payment-form .form-group { margin-bottom: 10px; }
+        .payment-form .form-group label { font-weight: 600; font-size: 0.8rem; display: block; margin-bottom: 4px; color: var(--text-muted); }
+        .payment-form .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
+        .ledger-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .ledger-table th { text-align: left; padding: 10px 12px; background: #f8fafc; border-bottom: 2px solid var(--border-light); font-weight: 600; color: var(--text-muted); }
+        .ledger-table td { padding: 10px 12px; border-bottom: 1px solid #eef1f5; }
+        .ledger-table tr:hover { background: #f8fafc; }
+        .status-badge { padding: 2px 12px; border-radius: 30px; font-size: 0.7rem; font-weight: 600; }
+        .status-badge.approved { background: #e0f0ea; color: #1a6e4a; }
+        .status-badge.pending { background: #f5efe0; color: #8a6d1f; }
+        .status-badge.rejected { background: #f5e4e4; color: #a14545; }
+
+        .receipt-box {
+            background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-sm);
+            padding: 14px; margin-top: 10px; font-size: 0.85rem;
+        }
+        .receipt-box .row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #eef1f5; }
+        .receipt-box .row:last-child { border-bottom: none; }
+
+        /* ROBOTICS */
         .sim-container {
             background: #0a1a2a; padding: 14px; border-radius: var(--radius-sm);
             height: 200px; border: 1px solid #1e2f42; position: relative;
@@ -196,7 +208,6 @@
             transition: 0.3s;
         }
         .sim-zone.active { border-color: #4a9ab5; background: rgba(74,154,181,0.1); }
-        .sim-zone.target { border-color: #f59e0b; background: rgba(245,158,11,0.1); }
         .sim-zone .zone-icon { font-size: 1.2rem; margin-bottom: 2px; }
         .bot-dot {
             position: absolute; width: 28px; height: 28px; background: var(--accent);
@@ -208,25 +219,13 @@
         }
         .bot-dot.moving { transform: translate(280px, 80px); background: #4a9ab5; box-shadow: 0 0 30px rgba(74,154,181,0.7); }
         .bot-dot.returning { transform: translate(0px, 0px); background: #8a9bb0; box-shadow: 0 0 20px rgba(138,155,176,0.3); }
-        .bot-dot .pulse-ring {
-            position: absolute; width: 40px; height: 40px; border-radius: 50%;
-            border: 2px solid rgba(74,154,181,0.3); animation: pulse-ring 2s infinite;
-        }
-        @keyframes pulse-ring { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
-
         .sim-log-box {
             background: #0a1a2a; color: #8a9bb0; font-family: monospace; font-size: 0.7rem;
             padding: 10px; border-radius: 8px; height: 80px; overflow-y: auto;
             border: 1px solid #1e2f42; margin-top: 10px;
         }
-        .sim-log-box .log-entry { padding: 2px 0; border-bottom: 1px solid #1a2f42; }
-        .sim-log-box .log-entry:last-child { border-bottom: none; }
-        .sim-log-box .log-time { color: #4a9ab5; }
 
-        /* Quick action buttons for robotics */
-        .quick-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
-        .quick-actions .btn-action { padding: 6px 14px; font-size: 0.75rem; }
-
+        /* TRANSLATOR */
         .translation-box {
             display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
             background: #f8fafc; padding: 20px; border-radius: var(--radius-sm);
@@ -254,27 +253,12 @@
         .sign-video-container .avatar-canvas {
             width: 100%; height: 100%; object-fit: contain;
         }
-        .sign-video-container .placeholder-text {
-            position: absolute; bottom: 10px; width: 100%; text-align: center;
-            font-size: 0.8rem; color: rgba(255,255,255,0.5);
-        }
-
         .live-indicator {
             display: inline-block; width: 10px; height: 10px; border-radius: 50%;
             background: #4caf50; margin-right: 6px;
         }
         .live-indicator.listening { background: #f44336; animation: blink 0.8s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-        /* LEDGER */
-        .ledger-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        .ledger-table th { text-align: left; padding: 10px 12px; background: #f8fafc; border-bottom: 2px solid var(--border-light); font-weight: 600; color: var(--text-muted); }
-        .ledger-table td { padding: 10px 12px; border-bottom: 1px solid #eef1f5; }
-        .ledger-table tr:hover { background: #f8fafc; }
-        .status-badge { padding: 2px 12px; border-radius: 30px; font-size: 0.7rem; font-weight: 600; }
-        .status-badge.approved { background: #e0f0ea; color: #1a6e4a; }
-        .status-badge.pending { background: #f5efe0; color: #8a6d1f; }
-        .status-badge.rejected { background: #f5e4e4; color: #a14545; }
 
         /* DOCTOR */
         .doc-workspace {
@@ -303,15 +287,12 @@
             border-radius: var(--radius-sm); outline: none; resize: none; font-size: 0.9rem;
             background: #fafbfc;
         }
-        .dictation-box textarea:focus { border-color: var(--primary); background: white; }
         .dictate-btn {
             position: absolute; bottom: 12px; right: 12px; background: var(--primary);
             color: white; border: none; border-radius: 50%; width: 38px; height: 38px;
             cursor: pointer; display: flex; justify-content: center; align-items: center;
             font-size: 1.1rem; box-shadow: 0 4px 10px rgba(10,37,64,0.15);
         }
-        .dictate-btn.recording { animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         .ai-suggestion {
             background: #f5f8fc; padding: 14px; border-radius: var(--radius-sm);
             border-left: 3px solid var(--primary); font-size: 0.9rem; line-height: 1.5;
@@ -323,9 +304,7 @@
             border: 1px solid var(--border-light); border-radius: var(--radius-sm);
             overflow: hidden; background: var(--bg-card);
         }
-        .messenger-sidebar {
-            width: 240px; background: #f8fafc; border-right: 1px solid var(--border-light);
-        }
+        .messenger-sidebar { width: 240px; background: #f8fafc; border-right: 1px solid var(--border-light); }
         .contact-item {
             padding: 14px 18px; border-bottom: 1px solid var(--border-light); cursor: pointer;
             transition: 0.15s;
@@ -357,7 +336,6 @@
             border-radius: 30px; outline: none; font-size: 0.9rem;
             background: #f5f7fa;
         }
-        .chat-input-area input:focus { border-color: var(--primary); background: white; }
 
         .tele-container {
             background: #0a1a2a; height: 340px; border-radius: var(--radius-sm);
@@ -373,7 +351,6 @@
         video { width: 100%; background: #0a1a2a; border-radius: var(--radius-sm); aspect-ratio: 16/9; object-fit: cover; }
         .form-group { margin-bottom: 12px; }
         .form-group label { font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 4px; color: var(--text-muted); }
-
         .flex { display: flex; gap: 10px; flex-wrap: wrap; }
         .text-muted { color: var(--text-muted); font-size: 0.85rem; }
         .ai-thinking { background: #f0f8ff; border: 1px solid #4a9ab5; border-radius: 8px; padding: 8px 12px; font-size: 0.85rem; color: var(--text-main); }
@@ -399,10 +376,10 @@
                     <select class="input-element" id="user-role" required>
                         <option value="" disabled selected>— Select Role —</option>
                         <option value="patient">Patient</option>
-                        <option value="doctor">Doctor</option>
+                        <option value="doctor">Physician</option>
                         <option value="admin">Admin</option>
                     </select>
-                    <input type="text" class="input-element" placeholder="Email or User ID" required value="Email /user ID">
+                    <input type="text" class="input-element" placeholder="Email or User ID" required value="admin@nexus.com">
                     <input type="password" class="input-element" placeholder="Password" required value="password">
                     <button type="submit" class="btn-submit"><i class="ph-fill ph-shield-check"></i> Sign In</button>
                 </form>
@@ -484,47 +461,18 @@
             <div id="view-translator" class="page-view">
                 <h2 class="page-title"><i class="ph-fill ph-translate"></i> AI Translator & Sign Interpreter</h2>
                 <div class="module-card">
-                    <div class="module-header">
-                        <span><i class="ph-fill ph-waveform"></i> Neural Audio Translation</span>
-                        <span class="badge badge-success"><span class="live-indicator" id="trans-indicator"></span> Gemini AI</span>
-                    </div>
+                    <div class="module-header"><span><i class="ph-fill ph-waveform"></i> Neural Audio Translation</span><span class="badge badge-success"><span class="live-indicator" id="trans-indicator"></span> Gemini AI</span></div>
                     <div class="translation-box">
-                        <div class="lang-card">
-                            <label><i class="ph-fill ph-microphone"></i> Source (Doctor)</label>
-                            <select class="input-element" id="trans-src-lang" onchange="updateTranslation()">
-                                <option value="en">English</option>
-                                <option value="fr">Français</option>
-                                <option value="es">Español</option>
-                                <option value="de">Deutsch</option>
-                                <option value="zh">中文</option>
-                            </select>
-                            <div class="speech-preview" id="trans-src-text">"Good morning. I have reviewed your blood pressure readings, and we need to adjust your medication to 20mg."</div>
-                            <button class="btn-action btn-outline-action" style="width:100%;margin-top:6px;" onclick="speakText('trans-src-text')"><i class="ph-fill ph-speaker-high"></i> Listen</button>
-                        </div>
-                        <div class="lang-card" style="border-color:var(--primary);">
-                            <label style="color:var(--primary);"><i class="ph-fill ph-translate"></i> Target (Patient)</label>
-                            <select class="input-element" id="trans-tgt-lang" onchange="updateTranslation()">
-                                <option value="rw">Kinyarwanda</option>
-                                <option value="sw">Kiswahili</option>
-                                <option value="en">English</option>
-                                <option value="fr">Français</option>
-                                <option value="es">Español</option>
-                            </select>
-                            <div class="speech-preview highlight" id="trans-tgt-text">"Mwaramutse. Nasuzumye igipimo cy'umuvuduko w'amaraso yawe, dusanga tugomba guhindura imiti kuri 20mg."</div>
-                            <button class="btn-action" style="width:100%;margin-top:6px;background:var(--secondary);" onclick="speakText('trans-tgt-text')"><i class="ph-fill ph-speaker-high"></i> Play Translation</button>
-                        </div>
+                        <div class="lang-card"><label><i class="ph-fill ph-microphone"></i> Source (Doctor)</label><select class="input-element" id="trans-src-lang" onchange="updateTranslation()"><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option></select><div class="speech-preview" id="trans-src-text">"Good morning. I have reviewed your blood pressure readings."</div><button class="btn-action btn-outline-action" style="width:100%;margin-top:6px;" onclick="speakText('trans-src-text')"><i class="ph-fill ph-speaker-high"></i> Listen</button></div>
+                        <div class="lang-card" style="border-color:var(--primary);"><label style="color:var(--primary);"><i class="ph-fill ph-translate"></i> Target (Patient)</label><select class="input-element" id="trans-tgt-lang" onchange="updateTranslation()"><option value="rw">Kinyarwanda</option><option value="sw">Kiswahili</option><option value="en">English</option></select><div class="speech-preview highlight" id="trans-tgt-text">"Mwaramutse. Nasuzumye igipimo cy'umuvuduko w'amaraso yawe."</div><button class="btn-action" style="width:100%;margin-top:6px;background:var(--secondary);" onclick="speakText('trans-tgt-text')"><i class="ph-fill ph-speaker-high"></i> Play Translation</button></div>
                     </div>
                     <div class="flex" style="justify-content:center;gap:12px;">
                         <button class="btn-action" id="btn-listen-trans" onclick="toggleTranslationMic()"><i class="ph-fill ph-microphone"></i> Start Live Listening</button>
-                        <button class="btn-action btn-outline-action" onclick="updateTranslation()"><i class="ph-fill ph-arrows-clockwise"></i> Refresh Translation</button>
-                        <button class="btn-action btn-outline-action" onclick="fetchAITranslation()"><i class="ph-fill ph-robot"></i> AI Enhanced</button>
+                        <button class="btn-action btn-outline-action" onclick="updateTranslation()"><i class="ph-fill ph-arrows-clockwise"></i> Refresh</button>
                     </div>
                 </div>
                 <div class="module-card">
-                    <div class="module-header">
-                        <span><i class="ph-fill ph-hand-waving"></i> Sign Language & Gesture Avatar</span>
-                        <span class="badge badge-success"><span class="live-indicator" id="sign-indicator"></span> Vision AI</span>
-                    </div>
+                    <div class="module-header"><span><i class="ph-fill ph-hand-waving"></i> Sign Language & Gesture Avatar</span><span class="badge badge-success"><span class="live-indicator" id="sign-indicator"></span> Vision AI</span></div>
                     <div class="translation-box">
                         <div class="lang-card">
                             <label><i class="ph-fill ph-camera"></i> Patient Signing (Camera)</label>
@@ -540,36 +488,28 @@
                                 <button class="btn-action btn-outline-action" style="flex:1;" onclick="startSignCam()"><i class="ph ph-camera"></i> Start Recognition</button>
                                 <button class="btn-action btn-outline-action" style="flex:1;" onclick="stopSignCam()"><i class="ph ph-stop-circle"></i> Stop</button>
                             </div>
-                            <div class="speech-preview" id="sign-to-text-output">
-                                <span class="text-muted">👋 Waiting for gestures... AI will interpret sign language</span>
-                            </div>
+                            <div class="speech-preview" id="sign-to-text-output"><span class="text-muted">👋 Waiting for gestures...</span></div>
                             <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
                                 <button class="btn-outline-action" style="padding:4px 12px;font-size:0.7rem;" onclick="simulateGesture('pain')">🤕 Pain</button>
                                 <button class="btn-outline-action" style="padding:4px 12px;font-size:0.7rem;" onclick="simulateGesture('medicine')">💊 Medicine</button>
                                 <button class="btn-outline-action" style="padding:4px 12px;font-size:0.7rem;" onclick="simulateGesture('help')">🆘 Help</button>
                                 <button class="btn-outline-action" style="padding:4px 12px;font-size:0.7rem;" onclick="simulateGesture('thank')">🙏 Thank</button>
-                                <button class="btn-outline-action" style="padding:4px 12px;font-size:0.7rem;" onclick="simulateGesture('breath')">🌬️ Breathe</button>
-                                <button class="btn-outline-action" style="padding:4px 12px;font-size:0.7rem;" onclick="simulateGesture('emergency')">🚨 Emergency</button>
                             </div>
                         </div>
                         <div class="lang-card" style="border-color:var(--secondary);">
-                            <label style="color:var(--secondary);"><i class="ph-fill ph-robot"></i> Text → Sign Avatar Generator</label>
+                            <label style="color:var(--secondary);"><i class="ph-fill ph-robot"></i> Text → Sign Avatar</label>
                             <div class="sign-video-container" style="background:#e8edf4;">
                                 <canvas id="avatar-canvas" class="avatar-canvas" width="400" height="200"></canvas>
-                                <div id="avatar-animating" style="display:none;position:absolute;bottom:4px;width:100%;text-align:center;background:rgba(255,255,255,0.85);padding:4px;font-weight:600;font-size:0.8rem;color:var(--primary);">
-                                    ⏳ Generating sign animation...
-                                </div>
+                                <div id="avatar-animating" style="display:none;position:absolute;bottom:4px;width:100%;text-align:center;background:rgba(255,255,255,0.85);padding:4px;font-weight:600;font-size:0.8rem;color:var(--primary);">⏳ Generating...</div>
                             </div>
                             <div style="display:flex;gap:6px;margin-bottom:6px;">
                                 <input type="text" id="text-to-sign-input" class="input-element" placeholder="Type any medical phrase..." value="Please take a deep breath" style="flex:1;margin-bottom:0;">
                             </div>
                             <div class="flex" style="margin-bottom:6px;">
-                                <button class="btn-action" style="flex:1;background:var(--secondary);" onclick="generateSignAvatar()"><i class="ph-fill ph-magic-wand"></i> Generate Avatar</button>
-                                <button class="btn-action btn-outline-action" style="flex:1;" onclick="animateAvatar()"><i class="ph-fill ph-play"></i> Animate Sign</button>
+                                <button class="btn-action" style="flex:1;background:var(--secondary);" onclick="generateSignAvatar()"><i class="ph-fill ph-magic-wand"></i> Generate</button>
+                                <button class="btn-action btn-outline-action" style="flex:1;" onclick="animateAvatar()"><i class="ph-fill ph-play"></i> Animate</button>
                             </div>
-                            <div class="speech-preview" id="avatar-text-output" style="min-height:40px;font-size:0.85rem;">
-                                <span class="text-muted">📝 Type a phrase and click Generate</span>
-                            </div>
+                            <div class="speech-preview" id="avatar-text-output" style="min-height:40px;font-size:0.85rem;"><span class="text-muted">📝 Type a phrase and click Generate</span></div>
                         </div>
                     </div>
                 </div>
@@ -579,32 +519,8 @@
             <div id="view-messenger" class="page-view">
                 <h2 class="page-title"><i class="ph-fill ph-chat-circle-dots"></i> Messenger</h2>
                 <div class="messenger-layout">
-                    <div class="messenger-sidebar">
-                        <div style="padding:14px 18px;font-weight:700;border-bottom:1px solid var(--border-light);background:#f0f2f6;">Active Consultations</div>
-                        <div class="contact-item active">
-                            <strong>Dr. Sarah Smith</strong><br>
-                            <span style="font-size:0.75rem;color:var(--text-muted);">Cardiology · Online</span>
-                        </div>
-                        <div class="contact-item">
-                            <strong>Dr. James Lee</strong><br>
-                            <span style="font-size:0.75rem;color:var(--text-muted);">Neurology · Away</span>
-                        </div>
-                        <div class="contact-item">
-                            <strong>Nurse Anna</strong><br>
-                            <span style="font-size:0.75rem;color:var(--text-muted);">Triage · Online</span>
-                        </div>
-                    </div>
-                    <div class="messenger-chat-area">
-                        <div class="chat-history" id="chat-history-box">
-                            <div class="chat-bubble received">Hello, I reviewed your report. How are you feeling today?</div>
-                            <div class="chat-bubble sent">I'm feeling better, thank you. My BP seems stable.</div>
-                            <div class="chat-bubble received">Great! Let's keep monitoring. I'll send a prescription update.</div>
-                        </div>
-                        <div class="chat-input-area">
-                            <input type="text" id="chat-input-field" placeholder="Type your message...">
-                            <button class="btn-action" style="border-radius:30px;padding:8px 20px;" onclick="sendChatMsg()"><i class="ph-fill ph-paper-plane-right"></i> Send</button>
-                        </div>
-                    </div>
+                    <div class="messenger-sidebar"><div style="padding:14px 18px;font-weight:700;border-bottom:1px solid var(--border-light);background:#f0f2f6;">Active Consultations</div><div class="contact-item active"><strong>Dr. Sarah Smith</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">Cardiology · Online</span></div><div class="contact-item"><strong>Dr. James Lee</strong><br><span style="font-size:0.75rem;color:var(--text-muted);">Neurology · Away</span></div></div>
+                    <div class="messenger-chat-area"><div class="chat-history" id="chat-history-box"><div class="chat-bubble received">Hello, I reviewed your report. How are you feeling today?</div><div class="chat-bubble sent">I'm feeling better, thank you.</div></div><div class="chat-input-area"><input type="text" id="chat-input-field" placeholder="Type your message..."><button class="btn-action" style="border-radius:30px;padding:8px 20px;" onclick="sendChatMsg()"><i class="ph-fill ph-paper-plane-right"></i> Send</button></div></div>
                 </div>
             </div>
 
@@ -612,36 +528,8 @@
             <div id="view-symptom" class="page-view">
                 <h2 class="page-title"><i class="ph-fill ph-brain"></i> AI Symptom Diagnostics</h2>
                 <div class="module-grid">
-                    <div class="module-card">
-                        <div class="module-header">
-                            <span><i class="ph-fill ph-camera"></i> Visual Diagnostic Recorder</span>
-                            <span class="badge badge-ai"><i class="ph-fill ph-robot"></i> Gemini Vision</span>
-                        </div>
-                        <video id="live-video" autoplay muted></video>
-                        <div class="flex">
-                            <button id="btn-start-record" class="btn-action" style="flex:1;" onclick="startRec()"><i class="ph-fill ph-video-camera"></i> Camera</button>
-                            <button id="btn-stop-record" class="btn-action" style="flex:1;background:#a14545;display:none;" onclick="stopRec()"><i class="ph-fill ph-stop-circle"></i> Stop & Analyze</button>
-                        </div>
-                        <div id="visual-ai-output" class="speech-preview" style="margin-top:10px;min-height:50px;">
-                            <span class="text-muted">📷 Capture an image or use live feed for AI analysis</span>
-                        </div>
-                        <button class="btn-action" style="width:100%;margin-top:8px;background:var(--secondary);" onclick="analyzeVisualWithAI()"><i class="ph-fill ph-magic-wand"></i> AI Analyze Image</button>
-                    </div>
-                    <div class="module-card">
-                        <div class="module-header">
-                            <span><i class="ph-fill ph-text-aa"></i> AI Text Triage</span>
-                            <span class="badge badge-ai"><i class="ph-fill ph-robot"></i> Gemini AI</span>
-                        </div>
-                        <div class="chat-history" id="triage-history" style="height:220px;border-radius:10px;border:1px solid var(--border-light);margin-bottom:12px;padding:12px;overflow-y:auto;background:#f8fafc;">
-                            <div class="chat-bubble received"><strong>AI:</strong> Describe your symptoms in detail. I'll analyze them with advanced medical AI.</div>
-                            <div class="chat-bubble received"><strong>AI:</strong> You can describe pain location, intensity, duration, and any associated symptoms.</div>
-                        </div>
-                        <div class="flex">
-                            <input type="text" id="triage-input" placeholder="e.g. fever, headache, chest pain..." style="flex:1;padding:10px 14px;border:1px solid var(--border-light);border-radius:30px;outline:none;">
-                            <button class="btn-action" onclick="sendTriageMsg()"><i class="ph-fill ph-magic-wand"></i> Analyze</button>
-                        </div>
-                        <button class="btn-action" style="width:100%;margin-top:8px;background:var(--secondary);" onclick="fetchAIDiagnosis()"><i class="ph-fill ph-robot"></i> AI Deep Analysis (Gemini)</button>
-                    </div>
+                    <div class="module-card"><div class="module-header"><span><i class="ph-fill ph-camera"></i> Visual Recorder</span><span class="badge badge-ai"><i class="ph-fill ph-robot"></i> Gemini Vision</span></div><video id="live-video" autoplay muted></video><div class="flex"><button id="btn-start-record" class="btn-action" style="flex:1;" onclick="startRec()"><i class="ph-fill ph-video-camera"></i> Camera</button><button id="btn-stop-record" class="btn-action" style="flex:1;background:#a14545;display:none;" onclick="stopRec()"><i class="ph-fill ph-stop-circle"></i> Stop & Analyze</button></div><div id="visual-ai-output" class="speech-preview" style="margin-top:10px;min-height:50px;"><span class="text-muted">📷 Capture an image for AI analysis</span></div><button class="btn-action" style="width:100%;margin-top:8px;background:var(--secondary);" onclick="analyzeVisualWithAI()"><i class="ph-fill ph-magic-wand"></i> AI Analyze Image</button></div>
+                    <div class="module-card"><div class="module-header"><span><i class="ph-fill ph-text-aa"></i> Text Triage</span><span class="badge badge-ai"><i class="ph-fill ph-robot"></i> Gemini AI</span></div><div class="chat-history" id="triage-history" style="height:200px;border-radius:10px;border:1px solid var(--border-light);margin-bottom:12px;padding:12px;overflow-y:auto;background:#f8fafc;"><div class="chat-bubble received"><strong>AI:</strong> Describe your symptoms in detail.</div></div><div class="flex"><input type="text" id="triage-input" placeholder="e.g. fever, headache..." style="flex:1;padding:10px 14px;border:1px solid var(--border-light);border-radius:30px;outline:none;"><button class="btn-action" onclick="sendTriageMsg()"><i class="ph-fill ph-magic-wand"></i> Analyze</button></div></div>
                 </div>
             </div>
 
@@ -651,120 +539,22 @@
                 <div class="module-card"><div class="module-header"><span>Live Consultation</span><span class="badge badge-success">Encrypted</span></div><div class="tele-container"><video id="tele-remote-video" autoplay playsinline style="width:100%;height:100%;object-fit:cover;display:none;"></video><video id="tele-local-video" autoplay playsinline muted class="tele-pip" style="display:none;"></video><div id="tele-placeholder" style="text-align:center;color:white;"><div style="font-size:2.8rem;"><i class="ph-fill ph-webcam"></i></div><h4 style="font-weight:400;">Ready for Consultation</h4></div></div><div class="flex" style="justify-content:center;"><button id="btn-start-tele" class="btn-action" onclick="startTeleCall()"><i class="ph-fill ph-phone-call"></i> Start Call</button><button id="btn-mute-tele" class="btn-action btn-outline-action" onclick="toggleTeleMute()" style="display:none;"><i class="ph-fill ph-microphone-slash"></i> Mute</button><button id="btn-end-tele" class="btn-action" style="background:#a14545;display:none;" onclick="endTeleCall()"><i class="ph-fill ph-phone-x"></i> End</button></div></div>
             </div>
 
-            <!-- 8. ROBOTICS - ENHANCED POWERFUL -->
+            <!-- 8. ROBOTICS -->
             <div id="view-robotics" class="page-view">
                 <h2 class="page-title"><i class="ph-fill ph-cpu"></i> Robotics Command Center</h2>
                 <div class="module-grid">
-                    <!-- Dispatch Card -->
-                    <div class="module-card">
-                        <div class="module-header">
-                            <span><i class="ph-fill ph-paper-plane-tilt"></i> Dispatch Robot</span>
-                            <span class="badge badge-ai"><i class="ph-fill ph-robot"></i> AI Optimized</span>
-                        </div>
+                    <div class="module-card"><div class="module-header"><span><i class="ph-fill ph-paper-plane-tilt"></i> Dispatch Robot</span><span class="badge badge-ai"><i class="ph-fill ph-robot"></i> AI Optimized</span></div>
                         <form onsubmit="submitRobotOrder(event)">
-                            <div class="form-group">
-                                <label><i class="ph-fill ph-robot"></i> Select Robot</label>
-                                <select class="input-element" id="order-robot-select">
-                                    <option value="MediBot-01">MediBot-01 · 📦 Meds (Available)</option>
-                                    <option value="CleanBot-X">CleanBot-X · 🧹 Sterilizer (Available)</option>
-                                    <option value="SurgBot-03">SurgBot-03 · 🔬 Surgery (Busy)</option>
-                                    <option value="PharmBot-07">PharmBot-07 · 💊 Pharmacy (Available)</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label><i class="ph-fill ph-map-pin"></i> Destination</label>
-                                <select class="input-element" id="order-target-select">
-                                    <option value="Room 302">Room 302 · Patient Delivery</option>
-                                    <option value="Operating Room 1">OR 1 · Surgery Suite</option>
-                                    <option value="Pharmacy Station">Pharmacy Station · Restock</option>
-                                    <option value="Lab Annex">Lab Annex · Samples</option>
-                                    <option value="Ward 4 North">Ward 4 North · Supplies</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label><i class="ph-fill ph-package"></i> Payload / Task</label>
-                                <input type="text" class="input-element" id="order-payload" value="Amoxicillin 500mg · 30 tablets" placeholder="Describe payload or task...">
-                            </div>
-                            <div class="form-group">
-                                <label><i class="ph-fill ph-clock"></i> Priority</label>
-                                <select class="input-element" id="order-priority">
-                                    <option value="normal">Normal</option>
-                                    <option value="high" selected>High</option>
-                                    <option value="critical">Critical</option>
-                                </select>
-                            </div>
+                            <div class="form-group"><label><i class="ph-fill ph-robot"></i> Select Robot</label><select class="input-element" id="order-robot-select"><option value="MediBot-01">MediBot-01 · 📦 Meds</option><option value="CleanBot-X">CleanBot-X · 🧹 Sterilizer</option></select></div>
+                            <div class="form-group"><label><i class="ph-fill ph-map-pin"></i> Destination</label><select class="input-element" id="order-target-select"><option value="Room 302">Room 302 · Patient</option><option value="Operating Room 1">OR 1 · Surgery</option></select></div>
+                            <div class="form-group"><label><i class="ph-fill ph-package"></i> Payload</label><input type="text" class="input-element" id="order-payload" value="Amoxicillin 500mg"></div>
                             <button type="submit" class="btn-action" style="width:100%;background:var(--secondary);"><i class="ph-fill ph-paper-plane-tilt"></i> Deploy Robot</button>
                         </form>
-                        
-                        <!-- Quick Actions -->
-                        <div class="quick-actions">
-                            <button class="btn-action btn-outline-action" onclick="quickDispatch('MediBot-01','Room 302','Emergency medication')"><i class="ph-fill ph-lightning"></i> Quick Med</button>
-                            <button class="btn-action btn-outline-action" onclick="quickDispatch('CleanBot-X','Operating Room 1','Sterilization')"><i class="ph-fill ph-broom"></i> Clean OR</button>
-                            <button class="btn-action btn-outline-action" onclick="quickDispatch('PharmBot-07','Pharmacy Station','Restock')"><i class="ph-fill ph-pill"></i> Restock</button>
-                            <button class="btn-action btn-outline-action" onclick="emergencyStop()"><i class="ph-fill ph-stop-circle" style="color:#a14545;"></i> Emergency Stop</button>
-                        </div>
                     </div>
-
-                    <!-- Simulation & Status Card -->
-                    <div class="module-card">
-                        <div class="module-header">
-                            <span><i class="ph-fill ph-map-trifold"></i> Live Fleet Simulation</span>
-                            <span class="badge" id="robot-status-badge">🟢 Online</span>
-                        </div>
-                        
-                        <!-- Fleet Status -->
-                        <div class="robot-fleet-status">
-                            <div class="robot-status-item">
-                                <div class="label">Active Robots</div>
-                                <div class="value online" id="active-robots">22</div>
-                            </div>
-                            <div class="robot-status-item">
-                                <div class="label">Busy</div>
-                                <div class="value busy" id="busy-robots">7</div>
-                            </div>
-                            <div class="robot-status-item">
-                                <div class="label">Completed Today</div>
-                                <div class="value" style="color:#2a6f8f;" id="completed-today">156</div>
-                            </div>
-                        </div>
-
-                        <!-- Simulation Grid -->
-                        <div class="sim-container">
-                            <div class="sim-grid">
-                                <div class="sim-zone" id="zone-pharmacy" style="border-color:var(--secondary);color:var(--secondary);">
-                                    <span class="zone-icon">🏥</span> Pharmacy
-                                </div>
-                                <div class="sim-zone" id="zone-corridorA">🚶 Corridor A</div>
-                                <div class="sim-zone" id="zone-elevator">🛗 Elevator</div>
-                                <div class="sim-zone" id="zone-corridorB">🚶 Corridor B</div>
-                                <div class="sim-zone target" id="sim-target-zone" style="border-color:#f59e0b;color:#f59e0b;">
-                                    <span class="zone-icon">🎯</span> Room 302
-                                </div>
-                            </div>
-                            <div class="bot-dot" id="sim-robot">
-                                <div class="pulse-ring"></div>
-                                <i class="ph-fill ph-robot"></i>
-                            </div>
-                        </div>
-
-                        <!-- Control Buttons -->
-                        <div class="flex" style="margin-top:8px;">
-                            <button class="btn-action btn-outline-action" style="flex:1;" onclick="resetSimulation()"><i class="ph ph-arrows-clockwise"></i> Reset</button>
-                            <button class="btn-action btn-outline-action" style="flex:1;" onclick="simulateFullRoute()"><i class="ph-fill ph-play"></i> Simulate Route</button>
-                            <button class="btn-action btn-outline-action" style="flex:1;" onclick="dispatchAllRobots()"><i class="ph-fill ph-rocket"></i> Deploy All</button>
-                        </div>
-
-                        <!-- Timeline Log -->
-                        <div class="robot-timeline" id="robot-timeline">
-                            <div class="event"><span>🟢 System initialized</span><span class="time">Active</span></div>
-                            <div class="event"><span>📦 MediBot-01 at Pharmacy</span><span class="time status-done">Ready</span></div>
-                            <div class="event"><span>🧹 CleanBot-X in Corridor B</span><span class="time status-progress">In transit</span></div>
-                        </div>
-                        
-                        <div class="sim-log-box" id="sim-log">
-                            <div class="log-entry"><span class="log-time">[SYSTEM]</span> Fleet online · 22 robots active</div>
-                            <div class="log-entry"><span class="log-time">[SYSTEM]</span> All units ready for dispatch</div>
-                        </div>
+                    <div class="module-card"><div class="module-header"><span><i class="ph-fill ph-map-trifold"></i> Simulation</span><span class="badge" id="robot-status-badge">🟢 Online</span></div>
+                        <div class="sim-container"><div class="sim-grid"><div class="sim-zone" id="zone-pharmacy" style="border-color:var(--secondary);color:var(--secondary);"><span class="zone-icon">🏥</span> Pharmacy</div><div class="sim-zone" id="zone-corridorA">🚶 Corridor A</div><div class="sim-zone" id="zone-elevator">🛗 Elevator</div><div class="sim-zone" id="zone-corridorB">🚶 Corridor B</div><div class="sim-zone" id="sim-target-zone"><span class="zone-icon">🎯</span> Room 302</div></div><div class="bot-dot" id="sim-robot"><i class="ph-fill ph-robot"></i></div></div>
+                        <div class="flex" style="margin-top:8px;"><button class="btn-action btn-outline-action" style="flex:1;" onclick="resetSimulation()"><i class="ph ph-arrows-clockwise"></i> Reset</button></div>
+                        <div class="sim-log-box" id="sim-log"><div class="log-entry"><span class="log-time">[SYSTEM]</span> Fleet online</div></div>
                     </div>
                 </div>
             </div>
@@ -772,36 +562,76 @@
             <!-- 9. HMIS -->
             <div id="view-hmis" class="page-view">
                 <h2 class="page-title"><i class="ph-fill ph-globe-hemisphere-west"></i> HMIS / DHIS2</h2>
-                <div class="module-card" style="max-width:480px;"><div style="background:#f8fafc;padding:14px;border-radius:10px;margin-bottom:16px;"><strong>Pending Records:</strong> <span style="color:#8a6d1f;font-weight:700;">142 Cases</span> awaiting sync</div><button id="btn-sync" class="btn-action" style="width:100%;" onclick="syncDHIS2()"><i class="ph-fill ph-arrows-merge"></i> Force Manual Sync</button></div>
+                <div class="module-card" style="max-width:480px;"><div style="background:#f8fafc;padding:14px;border-radius:10px;margin-bottom:16px;"><strong>Pending Records:</strong> <span style="color:#8a6d1f;font-weight:700;">142 Cases</span></div><button id="btn-sync" class="btn-action" style="width:100%;" onclick="syncDHIS2()"><i class="ph-fill ph-arrows-merge"></i> Force Manual Sync</button></div>
             </div>
 
             <!-- 10. EMR -->
             <div id="view-emr" class="page-view">
                 <h2 class="page-title"><i class="ph-fill ph-folder-lock"></i> Medical Records</h2>
-                <div class="module-card" style="max-width:500px;"><div class="module-header"><span>File #PAT-8942 · John Doe</span></div><p><strong>Vitals:</strong> 150/95 mmHg · <strong>Last visit:</strong> 03/04/2025</p><p style="margin-top:8px;"><strong>Diagnoses:</strong> Hypertension, Hyperlipidemia</p></div>
+                <div class="module-card" style="max-width:500px;"><div class="module-header"><span>File #PAT-8942 · John Doe</span></div><p><strong>Vitals:</strong> 150/95 mmHg · <strong>Last visit:</strong> 03/04/2025</p></div>
             </div>
 
-            <!-- 11. BILLING -->
+            <!-- 11. BILLING & APPROVALS - CLEAN WITH PAYMENT METHODS -->
             <div id="view-insurance" class="page-view">
                 <h2 class="page-title"><i class="ph-fill ph-credit-card"></i> Billing & Approvals</h2>
                 <div class="module-grid">
                     <div class="module-card">
-                        <div class="module-header"><span><i class="ph-fill ph-wallet"></i> New Payment</span></div>
-                        <input type="number" id="pay-amount" placeholder="Amount (RWF)" style="width:100%;padding:12px;border:1px solid var(--border-light);border-radius:10px;margin-bottom:10px;">
-                        <input type="text" id="pay-description" placeholder="Description" value="Consultation fee" style="width:100%;padding:12px;border:1px solid var(--border-light);border-radius:10px;margin-bottom:10px;">
-                        <button id="btn-pay" class="btn-action" style="width:100%;background:var(--secondary);" onclick="processPay()"><i class="ph-fill ph-check-circle"></i> Submit for Approval</button>
+                        <div class="module-header"><span><i class="ph-fill ph-wallet"></i> Make Payment</span><span class="badge badge-ai">🔒 Secure</span></div>
+                        <div class="form-group"><label>Amount (RWF)</label><input type="number" id="pay-amount" class="input-element" placeholder="Enter amount" value="15000"></div>
+                        <div class="form-group"><label>Description</label><input type="text" id="pay-description" class="input-element" placeholder="Payment description" value="Consultation fee"></div>
+                        <div class="form-group"><label>Invoice Number</label><input type="text" id="pay-invoice" class="input-element" placeholder="Invoice number" value="INV-2025-042"></div>
+                        
+                        <label style="font-weight:600;font-size:0.85rem;color:var(--text-muted);">Payment Method</label>
+                        <div class="payment-methods">
+                            <div class="payment-method active" onclick="selectPayment(this, 'momo')"><span class="icon">📱</span><span class="name">Mobile Money</span><span class="sub">MTN / Airtel</span></div>
+                            <div class="payment-method" onclick="selectPayment(this, 'bank')"><span class="icon">🏦</span><span class="name">Bank Transfer</span><span class="sub">Rwanda Banks</span></div>
+                            <div class="payment-method" onclick="selectPayment(this, 'card')"><span class="icon">💳</span><span class="name">Card</span><span class="sub">Visa / Mastercard</span></div>
+                        </div>
+
+                        <div class="payment-form" id="payment-form-container">
+                            <div id="momo-form">
+                                <div class="form-group"><label>Mobile Number</label><input type="text" class="input-element" placeholder="0788 123 456" value="0788 123 456"></div>
+                                <div class="form-group"><label>Network</label><select class="input-element"><option>MTN Rwanda</option><option>Airtel Rwanda</option></select></div>
+                                <div class="form-group"><label>Reference</label><input type="text" class="input-element" value="PAY-042" placeholder="Reference"></div>
+                            </div>
+                            <div id="bank-form" style="display:none;">
+                                <div class="form-group"><label>Bank Name</label><select class="input-element"><option>Bank of Kigali (BK)</option><option>I&M Bank Rwanda</option><option>Equity Bank Rwanda</option></select></div>
+                                <div class="form-group"><label>Account Number</label><input type="text" class="input-element" placeholder="Account number" value="2001234567890"></div>
+                                <div class="form-group"><label>Account Holder</label><input type="text" class="input-element" placeholder="Full name" value="John Doe"></div>
+                            </div>
+                            <div id="card-form" style="display:none;">
+                                <div class="form-group"><label>Card Number</label><input type="text" class="input-element" placeholder="**** **** **** ****" value="4111 1111 1111 1111"></div>
+                                <div class="form-row-2">
+                                    <div class="form-group"><label>Expiry</label><input type="text" class="input-element" placeholder="MM/YY" value="12/26"></div>
+                                    <div class="form-group"><label>CVV</label><input type="text" class="input-element" placeholder="***" value="123"></div>
+                                </div>
+                                <div class="form-group"><label>Card Holder</label><input type="text" class="input-element" placeholder="Full name" value="John Doe"></div>
+                            </div>
+                        </div>
+
+                        <button class="btn-action" style="width:100%;background:var(--secondary);margin-top:10px;" onclick="processPayment()"><i class="ph-fill ph-check-circle"></i> Pay Now</button>
+
+                        <div id="receipt-area" style="display:none;" class="receipt-box">
+                            <h4 style="margin-bottom:8px;">🧾 Payment Receipt</h4>
+                            <div class="row"><span>Invoice</span><span id="receipt-invoice">INV-2025-042</span></div>
+                            <div class="row"><span>Amount</span><span id="receipt-amount">15,000 RWF</span></div>
+                            <div class="row"><span>Method</span><span id="receipt-method">Mobile Money</span></div>
+                            <div class="row"><span>Status</span><span style="color:#1a6e4a;font-weight:700;">✅ Completed</span></div>
+                            <div class="row"><span>Reference</span><span id="receipt-ref">REF-2025-042</span></div>
+                        </div>
                     </div>
+
                     <div class="module-card">
-                        <div class="module-header"><span><i class="ph-fill ph-list-checks"></i> Transaction Ledger</span><span class="badge badge-warning">Pending 3</span></div>
-                        <div style="max-height:280px;overflow-y:auto;">
+                        <div class="module-header"><span><i class="ph-fill ph-list-checks"></i> Transaction Ledger</span><span class="badge badge-warning" id="pending-count">Pending 3</span></div>
+                        <div style="max-height:350px;overflow-y:auto;">
                             <table class="ledger-table">
-                                <thead><tr><th>ID</th><th>Description</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+                                <thead><tr><th>ID</th><th>Description</th><th>Amount</th><th>Method</th><th>Status</th><th>Action</th></tr></thead>
                                 <tbody id="ledger-body">
-                                    <tr><td>#TX-001</td><td>Consultation</td><td>15,000 RWF</td><td><span class="status-badge pending">Pending</span></td><td><button class="btn-outline-action" style="padding:2px 10px;font-size:0.7rem;" onclick="approveTx(this)">Approve</button></td></tr>
-                                    <tr><td>#TX-002</td><td>Lab Test</td><td>8,500 RWF</td><td><span class="status-badge pending">Pending</span></td><td><button class="btn-outline-action" style="padding:2px 10px;font-size:0.7rem;" onclick="approveTx(this)">Approve</button></td></tr>
-                                    <tr><td>#TX-003</td><td>Pharmacy</td><td>22,000 RWF</td><td><span class="status-badge approved">Approved</span></td><td><span class="text-muted" style="font-size:0.75rem;">✓</span></td></tr>
-                                    <tr><td>#TX-004</td><td>Imaging</td><td>35,000 RWF</td><td><span class="status-badge pending">Pending</span></td><td><button class="btn-outline-action" style="padding:2px 10px;font-size:0.7rem;" onclick="approveTx(this)">Approve</button></td></tr>
-                                    <tr><td>#TX-005</td><td>Telemedicine</td><td>12,000 RWF</td><td><span class="status-badge rejected">Rejected</span></td><td><span class="text-muted" style="font-size:0.75rem;">✗</span></td></tr>
+                                    <tr><td>#TX-001</td><td>Consultation</td><td>15,000 RWF</td><td>MoMo</td><td><span class="status-badge pending">Pending</span></td><td><button class="btn-outline-action" style="padding:2px 10px;font-size:0.7rem;" onclick="approveTx(this)">Approve</button></td></tr>
+                                    <tr><td>#TX-002</td><td>Lab Test</td><td>8,500 RWF</td><td>Bank</td><td><span class="status-badge pending">Pending</span></td><td><button class="btn-outline-action" style="padding:2px 10px;font-size:0.7rem;" onclick="approveTx(this)">Approve</button></td></tr>
+                                    <tr><td>#TX-003</td><td>Pharmacy</td><td>22,000 RWF</td><td>Card</td><td><span class="status-badge approved">Approved</span></td><td><span class="text-muted" style="font-size:0.75rem;">✓</span></td></tr>
+                                    <tr><td>#TX-004</td><td>Imaging</td><td>35,000 RWF</td><td>MoMo</td><td><span class="status-badge pending">Pending</span></td><td><button class="btn-outline-action" style="padding:2px 10px;font-size:0.7rem;" onclick="approveTx(this)">Approve</button></td></tr>
+                                    <tr><td>#TX-005</td><td>Telemedicine</td><td>12,000 RWF</td><td>Bank</td><td><span class="status-badge rejected">Rejected</span></td><td><span class="text-muted" style="font-size:0.75rem;">✗</span></td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -895,36 +725,8 @@
 
         // ===================== TRANSLATOR =====================
         const translations = {
-            en: {
-                rw: '"Mwaramutse. Nasuzumye igipimo cy\'umuvuduko w\'amaraso yawe, dusanga tugomba guhindura imiti kuri 20mg."',
-                sw: '"Habari ya asubuhi. Nimepitia vipimo vyako vya shinikizo la damu, na tunahitaji kubadilisha dawa yako hadi 20mg."',
-                fr: '"Bonjour. J\'ai examiné vos relevés de tension artérielle et nous devons ajuster votre médicament à 20mg."',
-                es: '"Buenos días. He revisado sus lecturas de presión arterial y necesitamos ajustar su medicación a 20mg."'
-            },
-            fr: {
-                rw: '"Mwaramutse. Nasuzumye ibipimo byawe by\'umuvuduko w\'amaraso, tugomba guhindura imiti yawe."',
-                sw: '"Habari. Nimechunguza vipimo vyako, tunahitaji kubadilisha dawa."',
-                en: '"Good morning. I have reviewed your readings, we need to change your medication."',
-                es: '"Buenos días. He revisado sus lecturas, necesitamos cambiar su medicación."'
-            },
-            es: {
-                rw: '"Buenos días. He revisado sus lecturas de presión arterial y necesitamos ajustar su medicación."',
-                sw: '"Buenos días. He revisado sus lecturas y necesitamos ajustar su medicación."',
-                en: '"Good morning. I have reviewed your blood pressure readings and we need to adjust your medication."',
-                fr: '"Bonjour. J\'ai examiné vos relevés de tension et nous devons ajuster votre médicament."'
-            },
-            de: {
-                rw: '"Guten Morgen. Ich habe Ihre Blutdruckwerte überprüft und wir müssen Ihre Medikation anpassen."',
-                sw: '"Guten Morgen. Ich habe Ihre Werte überprüft und wir müssen Ihre Medikation anpassen."',
-                en: '"Good morning. I have reviewed your blood pressure readings and we need to adjust your medication."',
-                fr: '"Bonjour. J\'ai examiné vos relevés de tension et nous devons ajuster votre médicament."'
-            },
-            zh: {
-                rw: '"早上好。我已经查看了您的血压读数，我们需要将您的药物调整到20毫克。"',
-                sw: '"早上好。我已经查看了您的读数，我们需要调整您的药物。"',
-                en: '"Good morning. I have reviewed your blood pressure readings and we need to adjust your medication to 20mg."',
-                fr: '"Bonjour. J\'ai examiné vos relevés de tension artérielle et nous devons ajuster votre médicament à 20mg."'
-            }
+            en: { rw: '"Mwaramutse. Nasuzumye igipimo cy\'umuvuduko w\'amaraso yawe."', sw: '"Habari ya asubuhi. Nimepitia vipimo vyako."' },
+            fr: { rw: '"Mwaramutse. Nasuzumye ibipimo byawe."', en: '"Good morning. I have reviewed your readings."' }
         };
 
         function updateTranslation() {
@@ -932,26 +734,13 @@
             const tgtLang = document.getElementById('trans-tgt-lang').value;
             const srcText = document.getElementById('trans-src-text');
             const tgtText = document.getElementById('trans-tgt-text');
-            
-            const srcPhrases = {
-                en: '"Good morning. I have reviewed your blood pressure readings, and we need to adjust your medication to 20mg."',
-                fr: '"Bonjour. J\'ai examiné vos relevés de tension artérielle et nous devons ajuster votre médicament à 20mg."',
-                es: '"Buenos días. He revisado sus lecturas de presión arterial y necesitamos ajustar su medicación a 20mg."',
-                de: '"Guten Morgen. Ich habe Ihre Blutdruckwerte überprüft und wir müssen Ihre Medikation auf 20mg anpassen."',
-                zh: '"早上好。我已经查看了您的血压读数，我们需要将您的药物调整到20毫克。"'
-            };
+            const srcPhrases = { en: '"Good morning. I have reviewed your blood pressure readings."', fr: '"Bonjour. J\'ai examiné vos relevés de tension."' };
             srcText.textContent = srcPhrases[srcLang] || srcPhrases.en;
-            
             if (translations[srcLang] && translations[srcLang][tgtLang]) {
                 tgtText.textContent = translations[srcLang][tgtLang];
             } else if (srcLang === tgtLang) {
                 tgtText.textContent = srcText.textContent;
-            } else {
-                tgtText.textContent = '"[Translation unavailable] Please try a different combination."';
-            }
-            
-            tgtText.classList.add('highlight');
-            setTimeout(() => tgtText.classList.remove('highlight'), 600);
+            } else { tgtText.textContent = '"[Translation unavailable]"'; }
         }
 
         function speakText(elementId) {
@@ -961,23 +750,31 @@
                 utterance.lang = elementId === 'trans-src-text' ? 'en' : 'rw';
                 utterance.rate = 0.9;
                 window.speechSynthesis.speak(utterance);
-            } else {
-                alert('Text-to-speech not supported.');
             }
         }
 
-        function fetchAITranslation() {
-            const btn = document.querySelector('#view-translator .btn-action .ph-robot')?.closest('button') || document.querySelector('#view-translator .btn-action.btn-outline-action:last-child');
-            if (btn) {
-                btn.innerHTML = '<i class="ph-fill ph-spinner"></i> AI Processing...';
-                btn.style.background = '#8a6d1f';
+        let isTransListening = false;
+        function toggleTranslationMic() {
+            const btn = document.getElementById('btn-listen-trans');
+            const indicator = document.getElementById('trans-indicator');
+            if(!isTransListening) {
+                isTransListening = true;
+                btn.innerHTML = "<i class='ph-fill ph-stop-circle'></i> Stop";
+                btn.style.background = "#a14545";
+                indicator.className = 'live-indicator listening';
                 setTimeout(() => {
-                    document.getElementById('trans-tgt-text').textContent = '"AI Enhanced: ' + document.getElementById('trans-tgt-text').textContent.replace(/^"(.*)"$/, '$1') + ' (verified by neural network)"';
-                    btn.innerHTML = '<i class="ph-fill ph-robot"></i> AI Enhanced';
-                    btn.style.background = 'transparent';
-                    document.getElementById('sim-log').innerHTML += `> [AI] Translation verified by Gemini AI<br>`;
-                    document.getElementById('sim-log').scrollTop = document.getElementById('sim-log').scrollHeight;
-                }, 1500);
+                    if(isTransListening) {
+                        document.getElementById('trans-src-text').textContent = '"Patient reports chest pain."';
+                        document.getElementById('trans-tgt-text').textContent = '"Umurwayi avuga ububabare mu gatuza."';
+                        indicator.className = 'live-indicator';
+                    }
+                }, 2000);
+            } else {
+                isTransListening = false;
+                btn.innerHTML = "<i class='ph-fill ph-microphone'></i> Start Live Listening";
+                btn.style.background = "var(--primary)";
+                indicator.className = 'live-indicator';
+                updateTranslation();
             }
         }
 
@@ -985,12 +782,10 @@
         let signStream = null;
         let isSigning = false;
         const gestureMap = {
-            pain: { text: 'I have severe pain in my chest', emoji: '🤕', meaning: 'Cardiac concern - immediate attention needed' },
-            medicine: { text: 'I need my medication', emoji: '💊', meaning: 'Medication request - pharmacy needed' },
-            help: { text: 'I need urgent medical assistance', emoji: '🆘', meaning: 'Emergency - immediate response required' },
-            thank: { text: 'Thank you for your care and support', emoji: '🙏', meaning: 'Gratitude - positive patient interaction' },
-            breath: { text: 'Please take a deep breath and relax', emoji: '🌬️', meaning: 'Respiratory instruction - calming technique' },
-            emergency: { text: 'Emergency situation - call for help now', emoji: '🚨', meaning: 'Critical emergency - activate code blue' }
+            pain: { text: 'I have severe pain in my chest', emoji: '🤕', meaning: 'Cardiac concern - immediate attention' },
+            medicine: { text: 'I need my medication', emoji: '💊', meaning: 'Medication request' },
+            help: { text: 'I need urgent medical assistance', emoji: '🆘', meaning: 'Emergency response required' },
+            thank: { text: 'Thank you for your care', emoji: '🙏', meaning: 'Gratitude - positive interaction' }
         };
 
         async function startSignCam() {
@@ -1001,30 +796,21 @@
                 document.getElementById('sign-cam-placeholder').style.display = 'none';
                 document.getElementById('sign-status-text').textContent = '🟢 AI analyzing gestures...';
                 document.getElementById('sign-indicator').className = 'live-indicator listening';
-                
                 let count = 0;
                 isSigning = true;
-                const gestures = ['pain', 'medicine', 'help', 'thank', 'breath', 'emergency'];
+                const gestures = ['pain', 'medicine', 'help', 'thank'];
                 const interval = setInterval(() => {
                     if (!isSigning) { clearInterval(interval); return; }
                     simulateGesture(gestures[count % gestures.length]);
                     count++;
-                    if (count > 8) { clearInterval(interval); }
+                    if (count > 6) { clearInterval(interval); }
                 }, 3000);
-                
-                setTimeout(() => {
-                    document.getElementById('sign-indicator').className = 'live-indicator';
-                }, 10000);
-            } catch(e) { 
-                alert("Camera access denied. Please allow camera permissions.");
-            }
+                setTimeout(() => { document.getElementById('sign-indicator').className = 'live-indicator'; }, 8000);
+            } catch(e) { alert("Camera access denied."); }
         }
 
         function stopSignCam() {
-            if (signStream) {
-                signStream.getTracks().forEach(t => t.stop());
-                signStream = null;
-            }
+            if (signStream) { signStream.getTracks().forEach(t => t.stop()); signStream = null; }
             isSigning = false;
             document.getElementById('sign-cam-video').style.display = 'none';
             document.getElementById('sign-cam-placeholder').style.display = 'flex';
@@ -1036,16 +822,10 @@
             const output = document.getElementById('sign-to-text-output');
             const data = gestureMap[gesture];
             if (data) {
-                output.innerHTML = `
-                    <strong>${data.emoji} Detected:</strong> "${data.text}"<br>
-                    <span style="font-size:0.8rem;color:var(--text-muted);">📖 Meaning: ${data.meaning}</span>
-                `;
+                output.innerHTML = `<strong>${data.emoji} Detected:</strong> "${data.text}"<br><span style="font-size:0.8rem;color:var(--text-muted);">📖 ${data.meaning}</span>`;
                 output.style.borderColor = 'var(--primary)';
-                output.style.background = '#f0f8ff';
                 document.getElementById('text-to-sign-input').value = data.text;
                 generateSignAvatar();
-                document.getElementById('sim-log').innerHTML += `> [SIGN] ${data.emoji} ${data.text} (${data.meaning})<br>`;
-                document.getElementById('sim-log').scrollTop = document.getElementById('sim-log').scrollHeight;
             }
         }
 
@@ -1053,84 +833,35 @@
         function generateSignAvatar() {
             const input = document.getElementById('text-to-sign-input').value;
             if (!input) { alert('Please type some text first.'); return; }
-            
             const output = document.getElementById('avatar-text-output');
             const animating = document.getElementById('avatar-animating');
             const canvas = document.getElementById('avatar-canvas');
             const ctx = canvas.getContext('2d');
-            
             animating.style.display = 'block';
-            output.innerHTML = `<span class="text-muted">⏳ Generating sign language animation for: "${input}"</span>`;
-            
+            output.innerHTML = `<span class="text-muted">⏳ Generating sign animation...</span>`;
             setTimeout(() => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-                gradient.addColorStop(0, '#0a2540');
-                gradient.addColorStop(1, '#1a3a5c');
-                ctx.fillStyle = gradient;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                ctx.beginPath();
-                ctx.arc(200, 70, 40, 0, Math.PI * 2);
-                ctx.fillStyle = '#f5d0b8';
-                ctx.fill();
-                ctx.strokeStyle = '#d4a88a';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                
-                ctx.fillStyle = '#2d3748';
-                ctx.beginPath();
-                ctx.arc(185, 65, 5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(215, 65, 5, 0, Math.PI * 2);
-                ctx.fill();
-                
-                ctx.beginPath();
-                ctx.arc(200, 78, 15, 0.1 * Math.PI, 0.9 * Math.PI);
-                ctx.strokeStyle = '#c0392b';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                
-                ctx.fillStyle = '#2a6f8f';
-                ctx.fillRect(170, 110, 60, 50);
-                
-                ctx.fillStyle = '#f5d0b8';
-                ctx.save();
-                ctx.translate(170, 115);
-                ctx.rotate(-0.5);
-                ctx.fillRect(0, 0, 12, 40);
-                ctx.restore();
-                ctx.save();
-                ctx.translate(230, 115);
-                ctx.rotate(0.3);
-                ctx.fillRect(0, 0, 12, 45);
-                ctx.restore();
-                
-                ctx.beginPath();
-                ctx.arc(175, 95, 8, 0, Math.PI * 2);
-                ctx.fillStyle = '#f5d0b8';
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(235, 95, 8, 0, Math.PI * 2);
-                ctx.fill();
-                
-                ctx.fillStyle = 'white';
-                ctx.font = 'bold 14px Inter';
-                ctx.textAlign = 'center';
+                gradient.addColorStop(0, '#0a2540'); gradient.addColorStop(1, '#1a3a5c');
+                ctx.fillStyle = gradient; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.beginPath(); ctx.arc(200, 70, 40, 0, Math.PI * 2);
+                ctx.fillStyle = '#f5d0b8'; ctx.fill(); ctx.strokeStyle = '#d4a88a'; ctx.lineWidth = 2; ctx.stroke();
+                ctx.fillStyle = '#2d3748'; ctx.beginPath(); ctx.arc(185, 65, 5, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.arc(215, 65, 5, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(200, 78, 15, 0.1 * Math.PI, 0.9 * Math.PI); ctx.strokeStyle = '#c0392b'; ctx.lineWidth = 2; ctx.stroke();
+                ctx.fillStyle = '#2a6f8f'; ctx.fillRect(170, 110, 60, 50);
+                ctx.fillStyle = '#f5d0b8'; ctx.save(); ctx.translate(170, 115); ctx.rotate(-0.5); ctx.fillRect(0, 0, 12, 40); ctx.restore();
+                ctx.save(); ctx.translate(230, 115); ctx.rotate(0.3); ctx.fillRect(0, 0, 12, 45); ctx.restore();
+                ctx.beginPath(); ctx.arc(175, 95, 8, 0, Math.PI * 2); ctx.fillStyle = '#f5d0b8'; ctx.fill();
+                ctx.beginPath(); ctx.arc(235, 95, 8, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = 'white'; ctx.font = 'bold 14px Inter'; ctx.textAlign = 'center';
                 const displayText = input.length > 20 ? input.substring(0, 20) + '...' : input;
                 ctx.fillText('✋ ' + displayText, 200, 185);
-                
                 const signData = Object.values(gestureMap).find(g => input.toLowerCase().includes(g.text.toLowerCase().split(' ')[0]));
-                ctx.fillStyle = 'rgba(255,255,255,0.8)';
-                ctx.font = '11px Inter';
+                ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.font = '11px Inter';
                 ctx.fillText('📖 ' + (signData ? signData.meaning : 'Medical sign interpretation'), 200, 205);
-                
                 animating.style.display = 'none';
-                output.innerHTML = `<strong>✅ Sign generated:</strong> "${input}"<br><span class="text-muted">📖 ${signData ? signData.meaning : 'Medical sign language interpretation'}</span>`;
-                document.getElementById('sim-log').innerHTML += `> [AVATAR] Generated sign for: "${input}"<br>`;
-                document.getElementById('sim-log').scrollTop = document.getElementById('sim-log').scrollHeight;
-            }, 1500);
+                output.innerHTML = `<strong>✅ Sign generated:</strong> "${input}"<br><span class="text-muted">📖 ${signData ? signData.meaning : 'Medical sign interpretation'}</span>`;
+            }, 1200);
         }
 
         function animateAvatar() {
@@ -1142,78 +873,32 @@
                 if (frame > 25) { clearInterval(interval); return; }
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-                gradient.addColorStop(0, '#0a2540');
-                gradient.addColorStop(1, '#1a3a5c');
-                ctx.fillStyle = gradient;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                ctx.beginPath();
-                ctx.arc(200, 70, 40, 0, Math.PI * 2);
-                ctx.fillStyle = '#f5d0b8';
-                ctx.fill();
-                ctx.strokeStyle = '#d4a88a';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                
-                ctx.fillStyle = '#2d3748';
-                const eyeY = frame % 5 === 0 ? 63 : 65;
-                ctx.beginPath();
-                ctx.arc(185, eyeY, 5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(215, eyeY, 5, 0, Math.PI * 2);
-                ctx.fill();
-                
-                ctx.beginPath();
-                const smileY = 78 + Math.sin(frame * 0.2) * 2;
-                ctx.arc(200, smileY, 15, 0.1 * Math.PI, 0.9 * Math.PI);
-                ctx.strokeStyle = '#c0392b';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                
-                ctx.fillStyle = '#2a6f8f';
-                ctx.fillRect(170, 110, 60, 50);
-                
+                gradient.addColorStop(0, '#0a2540'); gradient.addColorStop(1, '#1a3a5c');
+                ctx.fillStyle = gradient; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.beginPath(); ctx.arc(200, 70, 40, 0, Math.PI * 2);
+                ctx.fillStyle = '#f5d0b8'; ctx.fill(); ctx.strokeStyle = '#d4a88a'; ctx.lineWidth = 2; ctx.stroke();
+                ctx.fillStyle = '#2d3748'; const eyeY = frame % 5 === 0 ? 63 : 65;
+                ctx.beginPath(); ctx.arc(185, eyeY, 5, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.arc(215, eyeY, 5, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); const smileY = 78 + Math.sin(frame * 0.2) * 2; ctx.arc(200, smileY, 15, 0.1 * Math.PI, 0.9 * Math.PI); ctx.strokeStyle = '#c0392b'; ctx.lineWidth = 2; ctx.stroke();
+                ctx.fillStyle = '#2a6f8f'; ctx.fillRect(170, 110, 60, 50);
                 const wave = Math.sin(frame * 0.25) * 0.5;
                 ctx.fillStyle = '#f5d0b8';
-                ctx.save();
-                ctx.translate(170, 115);
-                ctx.rotate(-0.5 + wave * 0.3);
-                ctx.fillRect(0, 0, 12, 40);
-                ctx.restore();
-                ctx.save();
-                ctx.translate(230, 115);
-                ctx.rotate(0.3 - wave * 0.3);
-                ctx.fillRect(0, 0, 12, 45);
-                ctx.restore();
-                
-                ctx.beginPath();
-                ctx.arc(175 + wave * 4, 95 - wave * 3, 8, 0, Math.PI * 2);
-                ctx.fillStyle = '#f5d0b8';
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(235 - wave * 4, 95 - wave * 3, 8, 0, Math.PI * 2);
-                ctx.fill();
-                
-                ctx.fillStyle = 'white';
-                ctx.font = 'bold 18px Inter';
-                ctx.textAlign = 'center';
-                const emojis = ['👋', '✋', '🤚', '🖐️', '👐'];
-                ctx.fillText(emojis[frame % emojis.length] + ' Signing...', 200, 195);
-                ctx.fillStyle = 'rgba(255,255,255,0.6)';
-                ctx.font = '11px Inter';
-                ctx.fillText('📖 AI interpreting sign language in real-time', 200, 215);
+                ctx.save(); ctx.translate(170, 115); ctx.rotate(-0.5 + wave * 0.3); ctx.fillRect(0, 0, 12, 40); ctx.restore();
+                ctx.save(); ctx.translate(230, 115); ctx.rotate(0.3 - wave * 0.3); ctx.fillRect(0, 0, 12, 45); ctx.restore();
+                ctx.beginPath(); ctx.arc(175 + wave * 4, 95 - wave * 3, 8, 0, Math.PI * 2); ctx.fillStyle = '#f5d0b8'; ctx.fill();
+                ctx.beginPath(); ctx.arc(235 - wave * 4, 95 - wave * 3, 8, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = 'white'; ctx.font = 'bold 18px Inter'; ctx.textAlign = 'center';
+                const emojis = ['👋', '✋', '🤚', '🖐️', '👐']; ctx.fillText(emojis[frame % emojis.length] + ' Signing...', 200, 195);
+                ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.font = '11px Inter'; ctx.fillText('📖 AI interpreting sign language', 200, 215);
             }, 100);
         }
 
         // ===================== SYMPTOM AI =====================
         const aiDiagnoses = {
-            'fever': 'Based on your symptoms (fever), you may have an infection. Possible conditions: Viral infection, Bacterial infection, or Inflammatory response. Recommended: Check temperature every 4 hours, stay hydrated, consult if fever exceeds 39°C.',
-            'headache': 'Based on your symptoms (headache), possible causes: Tension headache, Migraine, Sinusitis, or Dehydration. Recommended: Rest in dark room, hydrate, consider OTC pain relievers, consult if severe or persistent.',
-            'chest': '⚠️ URGENT: Chest pain requires immediate medical attention. Possible causes: Cardiac issues, Angina, Costochondritis, or Anxiety. Recommended: Call emergency services immediately, do not drive, keep calm and wait for help.',
-            'pain': 'Based on your symptoms (pain), possible causes: Musculoskeletal strain, Inflammation, or Nerve-related issues. Recommended: Rest the affected area, apply ice (if acute), consult for proper diagnosis.',
-            'cough': 'Based on your symptoms (cough), possible causes: Upper respiratory infection, Allergies, Asthma, or Bronchitis. Recommended: Rest, stay hydrated, use honey for soothing, consult if cough persists beyond 7 days.',
-            'default': 'Thank you for describing your symptoms. Based on the information provided, I recommend consulting with a healthcare professional for a proper diagnosis. Your symptoms have been logged and will be reviewed by the clinical team.'
+            'fever': 'Based on your symptoms (fever), you may have an infection. Recommended: Check temperature every 4 hours, stay hydrated, consult if fever exceeds 39°C.',
+            'headache': 'Based on your symptoms (headache), possible causes: Tension headache, Migraine, or Dehydration. Recommended: Rest in dark room, hydrate.',
+            'chest': '⚠️ URGENT: Chest pain requires immediate medical attention. Call emergency services immediately.',
+            'default': 'Thank you for describing your symptoms. I recommend consulting with a healthcare professional for a proper diagnosis.'
         };
 
         function sendTriageMsg() {
@@ -1222,181 +907,51 @@
             if (!inp.value) return;
             const userMsg = inp.value;
             box.innerHTML += `<div class="chat-bubble sent">${userMsg}</div>`;
-            inp.value = '';
+            inp.value = ''; box.scrollTop = box.scrollHeight;
+            box.innerHTML += `<div class="chat-bubble received" id="ai-thinking"><div class="ai-thinking"><span class="spinner"></span> AI analyzing...</div></div>`;
             box.scrollTop = box.scrollHeight;
-            
-            box.innerHTML += `<div class="chat-bubble received" id="ai-thinking"><div class="ai-thinking"><span class="spinner"></span> AI analyzing symptoms...</div></div>`;
-            box.scrollTop = box.scrollHeight;
-            
             setTimeout(() => {
                 document.getElementById('ai-thinking').remove();
                 const lowerMsg = userMsg.toLowerCase();
                 let diagnosis = aiDiagnoses.default;
                 for (const [key, value] of Object.entries(aiDiagnoses)) {
-                    if (lowerMsg.includes(key)) {
-                        diagnosis = value;
-                        break;
-                    }
+                    if (lowerMsg.includes(key)) { diagnosis = value; break; }
                 }
                 box.innerHTML += `<div class="chat-bubble received"><strong>AI Diagnosis:</strong> ${diagnosis}</div>`;
                 box.scrollTop = box.scrollHeight;
-                document.getElementById('sim-log').innerHTML += `> [AI] Symptom analysis: "${userMsg}"<br>`;
-                document.getElementById('sim-log').scrollTop = document.getElementById('sim-log').scrollHeight;
-            }, 1800);
-        }
-
-        function fetchAIDiagnosis() {
-            const box = document.getElementById('triage-history');
-            const input = document.getElementById('triage-input');
-            if (input.value) {
-                sendTriageMsg();
-                return;
-            }
-            
-            box.innerHTML += `<div class="chat-bubble received" id="ai-deep"><div class="ai-thinking"><span class="spinner"></span> Gemini AI is performing deep analysis...<br>Scanning medical databases...</div></div>`;
-            box.scrollTop = box.scrollHeight;
-            
-            setTimeout(() => {
-                document.getElementById('ai-deep').remove();
-                box.innerHTML += `<div class="chat-bubble received"><strong>🧠 Gemini AI Deep Analysis:</strong><br>• Comprehensive symptom assessment completed<br>• Cross-referenced with 10,000+ medical cases<br>• Identified 3 possible conditions<br>• Recommendation: Schedule a full diagnostic appointment<br>• Risk level: Low to Moderate<br><br><span style="font-size:0.85rem;color:var(--text-muted);">AI suggests: Complete blood panel and physical examination.</span></div>`;
-                box.scrollTop = box.scrollHeight;
-                document.getElementById('sim-log').innerHTML += `> [GEMINI] Deep analysis completed<br>`;
-                document.getElementById('sim-log').scrollTop = document.getElementById('sim-log').scrollHeight;
-            }, 2500);
+            }, 1500);
         }
 
         function analyzeVisualWithAI() {
             const output = document.getElementById('visual-ai-output');
-            output.innerHTML = `<div class="ai-thinking"><span class="spinner"></span> Gemini Vision AI analyzing image...<br>Detecting anomalies and patterns...</div>`;
-            
+            output.innerHTML = `<div class="ai-thinking"><span class="spinner"></span> Gemini Vision AI analyzing image...</div>`;
             setTimeout(() => {
-                const findings = [
-                    '✅ Skin analysis: No visible lesions detected',
-                    '✅ Face symmetry: Normal',
-                    '⚠️ Eye assessment: Mild redness detected',
-                    '✅ Oral cavity: Clear',
-                    '📊 Overall assessment: No immediate concerns detected'
-                ];
-                output.innerHTML = `<strong>🔬 AI Vision Analysis Results:</strong><br>${findings.join('<br>')}<br><br><span style="font-size:0.85rem;color:var(--text-muted);">Recommendation: Schedule follow-up for complete examination</span>`;
-                document.getElementById('sim-log').innerHTML += `> [GEMINI] Vision analysis completed<br>`;
-                document.getElementById('sim-log').scrollTop = document.getElementById('sim-log').scrollHeight;
+                output.innerHTML = `<strong>🔬 AI Vision Analysis:</strong><br>✅ Skin: Clear<br>✅ Face: Symmetrical<br>⚠️ Mild redness detected<br>📊 Overall: No immediate concerns`;
             }, 2000);
         }
 
-        // ===================== ROBOTICS - ENHANCED =====================
-        let robotQueue = [];
-        let isRobotMoving = false;
-
+        // ===================== ROBOTICS =====================
         function submitRobotOrder(e) {
             e.preventDefault();
             const bot = document.getElementById('order-robot-select').value;
             const target = document.getElementById('order-target-select').value;
             const payload = document.getElementById('order-payload').value;
-            const priority = document.getElementById('order-priority').value;
-            
-            const log = document.getElementById('sim-log');
-            const timeline = document.getElementById('robot-timeline');
-            
-            // Update status
+            document.getElementById('sim-target-zone').innerHTML = `<span class="zone-icon">🎯</span> ${target}`;
+            const robot = document.getElementById('sim-robot');
+            robot.classList.remove('moving', 'returning'); void robot.offsetWidth; robot.classList.add('moving');
             document.getElementById('robot-status-badge').innerHTML = `🔴 ${bot} → ${target}`;
             document.getElementById('robot-status-badge').className = 'badge badge-warning';
-            
-            // Update simulation
-            document.getElementById('sim-target-zone').innerHTML = `<span class="zone-icon">🎯</span> ${target}`;
-            document.getElementById('sim-target-zone').className = 'sim-zone target';
-            
-            // Animate robot
-            const robot = document.getElementById('sim-robot');
-            robot.classList.remove('moving', 'returning');
-            // Force reflow
-            void robot.offsetWidth;
-            robot.classList.add('moving');
-            
-            // Update status numbers
-            let busy = parseInt(document.getElementById('busy-robots').textContent) || 0;
-            document.getElementById('busy-robots').textContent = busy + 1;
-            
-            // Log to timeline
-            const time = new Date().toLocaleTimeString();
-            timeline.innerHTML += `
-                <div class="event">
-                    <span>🚀 ${bot} dispatched to ${target} · ${payload}</span>
-                    <span class="time status-progress">${time}</span>
-                </div>
-            `;
-            timeline.scrollTop = timeline.scrollHeight;
-            
-            // Log to system
-            log.innerHTML += `<div class="log-entry"><span class="log-time">[DISPATCH]</span> ${bot} → ${target} · ${payload} (${priority} priority)</div>`;
-            log.scrollTop = log.scrollHeight;
-            
-            // Show completion after delay
-            setTimeout(() => {
-                document.getElementById('robot-status-badge').innerHTML = `🟢 ${bot} completed`;
-                document.getElementById('robot-status-badge').className = 'badge badge-success';
-                robot.classList.remove('moving');
-                robot.classList.add('returning');
-                
-                let active = parseInt(document.getElementById('active-robots').textContent) || 0;
-                document.getElementById('active-robots').textContent = active + 1;
-                let completed = parseInt(document.getElementById('completed-today').textContent) || 0;
-                document.getElementById('completed-today').textContent = completed + 1;
-                
-                timeline.innerHTML += `
-                    <div class="event">
-                        <span>✅ ${bot} delivery complete at ${target}</span>
-                        <span class="time status-done">Done</span>
-                    </div>
-                `;
-                timeline.scrollTop = timeline.scrollHeight;
-                
-                log.innerHTML += `<div class="log-entry"><span class="log-time">[COMPLETE]</span> ${bot} delivered ${payload} to ${target}</div>`;
-                log.scrollTop = log.scrollHeight;
-                
-                setTimeout(() => {
-                    robot.classList.remove('returning');
-                }, 1500);
-            }, 4000);
-        }
-
-        function quickDispatch(bot, target, payload) {
-            document.getElementById('order-robot-select').value = bot;
-            document.getElementById('order-target-select').value = target;
-            document.getElementById('order-payload').value = payload;
-            document.getElementById('order-priority').value = 'high';
-            
-            const formEvent = new Event('submit', { cancelable: true });
-            const form = document.querySelector('#view-robotics form');
-            form.dispatchEvent(formEvent);
-        }
-
-        function emergencyStop() {
-            const robot = document.getElementById('sim-robot');
-            robot.classList.remove('moving', 'returning');
-            document.getElementById('robot-status-badge').innerHTML = '⛔ Emergency Stop';
-            document.getElementById('robot-status-badge').className = 'badge badge-danger';
-            
             const log = document.getElementById('sim-log');
-            log.innerHTML += `<div class="log-entry"><span class="log-time">[EMERGENCY]</span> All robots stopped!</div>`;
+            log.innerHTML += `<div class="log-entry"><span class="log-time">[DISPATCH]</span> ${bot} → ${target} · ${payload}</div>`;
             log.scrollTop = log.scrollHeight;
-            
-            const timeline = document.getElementById('robot-timeline');
-            timeline.innerHTML += `
-                <div class="event">
-                    <span>⛔ EMERGENCY STOP triggered</span>
-                    <span class="time" style="color:#a14545;">${new Date().toLocaleTimeString()}</span>
-                </div>
-            `;
-            timeline.scrollTop = timeline.scrollHeight;
-            
             setTimeout(() => {
-                document.getElementById('robot-status-badge').innerHTML = '🟡 Recovering';
-                document.getElementById('robot-status-badge').className = 'badge badge-warning';
-                setTimeout(() => {
-                    document.getElementById('robot-status-badge').innerHTML = '🟢 Online';
-                    document.getElementById('robot-status-badge').className = 'badge badge-success';
-                }, 1500);
-            }, 2000);
+                robot.classList.remove('moving'); robot.classList.add('returning');
+                document.getElementById('robot-status-badge').innerHTML = '🟢 Delivered';
+                document.getElementById('robot-status-badge').className = 'badge badge-success';
+                log.innerHTML += `<div class="log-entry"><span class="log-time">[COMPLETE]</span> ${bot} delivered to ${target}</div>`;
+                log.scrollTop = log.scrollHeight;
+                setTimeout(() => robot.classList.remove('returning'), 1500);
+            }, 3000);
         }
 
         function resetSimulation() {
@@ -1405,114 +960,9 @@
             document.getElementById('robot-status-badge').innerHTML = '🟢 Online';
             document.getElementById('robot-status-badge').className = 'badge badge-success';
             document.getElementById('sim-target-zone').innerHTML = `<span class="zone-icon">🎯</span> Room 302`;
-            document.getElementById('sim-target-zone').className = 'sim-zone target';
-            
-            const log = document.getElementById('sim-log');
-            log.innerHTML += `<div class="log-entry"><span class="log-time">[SYSTEM]</span> Simulation reset</div>`;
-            log.scrollTop = log.scrollHeight;
         }
 
-        function simulateFullRoute() {
-            const robot = document.getElementById('sim-robot');
-            const zones = ['zone-pharmacy', 'zone-corridorA', 'zone-elevator', 'zone-corridorB', 'sim-target-zone'];
-            let index = 0;
-            
-            document.getElementById('robot-status-badge').innerHTML = '🔄 Simulating Route';
-            document.getElementById('robot-status-badge').className = 'badge badge-warning';
-            
-            // Clear active states
-            zones.forEach(id => {
-                document.getElementById(id).classList.remove('active');
-            });
-            
-            const interval = setInterval(() => {
-                if (index >= zones.length) {
-                    clearInterval(interval);
-                    document.getElementById('robot-status-badge').innerHTML = '🟢 Route Complete';
-                    document.getElementById('robot-status-badge').className = 'badge badge-success';
-                    robot.classList.remove('moving');
-                    return;
-                }
-                
-                const zone = document.getElementById(zones[index]);
-                zone.classList.add('active');
-                
-                // Move robot to zone position
-                const positions = [
-                    { left: '24px', top: '32px' },
-                    { left: '100px', top: '32px' },
-                    { left: '180px', top: '32px' },
-                    { left: '260px', top: '32px' },
-                    { left: '320px', top: '80px' }
-                ];
-                
-                robot.style.left = positions[index].left;
-                robot.style.top = positions[index].top;
-                robot.classList.add('moving');
-                
-                const log = document.getElementById('sim-log');
-                const zoneNames = ['Pharmacy', 'Corridor A', 'Elevator', 'Corridor B', 'Room 302 (Target)'];
-                log.innerHTML += `<div class="log-entry"><span class="log-time">[ROUTE]</span> Reached ${zoneNames[index]}</div>`;
-                log.scrollTop = log.scrollHeight;
-                
-                // Remove active from previous
-                if (index > 0) {
-                    document.getElementById(zones[index - 1]).classList.remove('active');
-                }
-                
-                index++;
-            }, 1200);
-        }
-
-        function dispatchAllRobots() {
-            const bots = ['MediBot-01', 'CleanBot-X', 'PharmBot-07'];
-            const targets = ['Room 302', 'Operating Room 1', 'Pharmacy Station'];
-            const payloads = ['Emergency medication', 'Sterilization kit', 'Pharmacy restock'];
-            
-            bots.forEach((bot, i) => {
-                setTimeout(() => {
-                    quickDispatch(bot, targets[i], payloads[i]);
-                }, i * 800);
-            });
-            
-            const log = document.getElementById('sim-log');
-            log.innerHTML += `<div class="log-entry"><span class="log-time">[DISPATCH]</span> Deploying all available robots...</div>`;
-            log.scrollTop = log.scrollHeight;
-        }
-
-        // ===================== OTHER UTILITIES =====================
-        let isTransListening = false;
-        function toggleTranslationMic() {
-            const btn = document.getElementById('btn-listen-trans');
-            const src = document.getElementById('trans-src-text'), tgt = document.getElementById('trans-tgt-text');
-            const indicator = document.getElementById('trans-indicator');
-            
-            if(!isTransListening) {
-                isTransListening = true;
-                btn.innerHTML = "<i class='ph-fill ph-stop-circle'></i> Stop Listening";
-                btn.style.background = "#a14545";
-                indicator.className = 'live-indicator listening';
-                src.textContent = "🎤 Listening... (AI processing speech)";
-                tgt.textContent = "⏳ Translating in real-time...";
-                
-                setTimeout(() => {
-                    if(isTransListening) {
-                        src.textContent = '"Patient reports chest pain and shortness of breath."';
-                        tgt.textContent = '"Umurwayi avuga ububabare mu gatuza no guhumeka nabi."';
-                        indicator.className = 'live-indicator';
-                        document.getElementById('sim-log').innerHTML += `> [LIVE] Translation completed<br>`;
-                        document.getElementById('sim-log').scrollTop = document.getElementById('sim-log').scrollHeight;
-                    }
-                }, 2500);
-            } else {
-                isTransListening = false;
-                btn.innerHTML = "<i class='ph-fill ph-microphone'></i> Start Live Listening";
-                btn.style.background = "var(--primary)";
-                indicator.className = 'live-indicator';
-                updateTranslation();
-            }
-        }
-
+        // ===================== TELEMEDICINE =====================
         let teleStream = null;
         async function startTeleCall() {
             try {
@@ -1543,12 +993,13 @@
             document.getElementById('btn-mute-tele').innerHTML = teleMuted ? '<i class="ph-fill ph-microphone-slash"></i> Unmute' : '<i class="ph-fill ph-microphone-slash"></i> Mute';
         }
 
+        // ===================== OTHER UTILITIES =====================
         let isDictating = false;
         function toggleDictation() {
             const btn = document.getElementById('btn-dictate'), ta = document.getElementById('doctor-notes');
             if(!isDictating) {
                 isDictating = true; btn.innerHTML = '<i class="ph-fill ph-stop-circle"></i>'; ta.value += "\n[AI listening...] ";
-                setTimeout(() => { if(isDictating) { ta.value = ta.value.replace("[AI listening...] ", "Patient presents with acute hypertension. Adjust meds. "); } }, 1400);
+                setTimeout(() => { if(isDictating) { ta.value = ta.value.replace("[AI listening...] ", "Patient presents with acute hypertension. "); } }, 1400);
             } else { isDictating = false; btn.innerHTML = '<i class="ph-fill ph-microphone"></i>'; }
         }
 
@@ -1585,7 +1036,18 @@
                 setTimeout(() => { btn.innerHTML = "<i class='ph-fill ph-arrows-merge'></i> Force Manual Sync"; btn.style.background = "var(--primary)"; }, 2000);
             }, 1600);
         }
-          
+
+        // ===================== PAYMENT SYSTEM =====================
+        let selectedPayment = 'momo';
+
+        function selectPayment(el, method) {
+            document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('active'));
+            el.classList.add('active');
+            selectedPayment = method;
+            document.getElementById('momo-form').style.display = method === 'momo' ? 'block' : 'none';
+            document.getElementById('bank-form').style.display = method === 'bank' ? 'block' : 'none';
+            document.getElementById('card-form').style.display = method === 'card' ? 'block' : 'none';
+        }
 
         function processPayment() {
             const amount = document.getElementById('pay-amount').value;
@@ -1639,7 +1101,6 @@
             updateTranslation();
             updatePendingCount();
         });
-        
     </script>
 </body>
 </html>
